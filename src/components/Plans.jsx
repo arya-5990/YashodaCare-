@@ -16,25 +16,9 @@ export default function PlanSection() {
       {/* Subtle background shape */}
       <div className="absolute top-0 right-0 w-72 h-72 bg-teal-50 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto px-5 md:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-5 md:px-8 relative z-10">
 
-        {/* Section label */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.4 }}
-          className="mb-14"
-        >
-          <p className="text-xs font-semibold tracking-widest uppercase text-coral mb-3">
-            Our Flagship Plan
-          </p>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-teal-950 leading-snug max-w-md">
-            Everything your teeth need. One flat price.
-          </h2>
-        </motion.div>
-
-        {/* Plan card — the hero of this section */}
+        {/* Plan card */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -43,44 +27,48 @@ export default function PlanSection() {
           className="grid lg:grid-cols-[1fr_1.2fr] gap-0 rounded-2xl overflow-hidden border border-gray-100 shadow-xl shadow-gray-100/50"
         >
           {/* Left — price & CTA */}
-          <div className="bg-teal-900 text-white p-8 md:p-12 flex flex-col justify-between">
-            <div>
-              <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-teal-100 mb-6">
+          <div className="bg-teal-900 text-white p-8 md:p-12 flex flex-col justify-between relative overflow-hidden">
+            {/* Soft decorative glow */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-teal-700 rounded-full blur-3xl opacity-30 pointer-events-none" />
+
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide text-teal-50 mb-7 border border-white/5">
                 <Sparkles size={12} />
-                Most popular
+                Most Popular
               </div>
 
-              <h3 className="font-display text-2xl md:text-3xl font-bold mb-2">
+              <h3 className="font-display text-2xl md:text-4xl font-bold mb-3">
                 Premium Dental Plan
               </h3>
-              <p className="text-teal-200 text-sm leading-relaxed mb-8 max-w-xs">
+              <p className="text-teal-100 text-[15px] leading-relaxed mb-9 max-w-sm">
                 Annual coverage for your entire family's routine dental needs — 
                 no per-visit fees, no hidden charges.
               </p>
 
-              <div className="mb-8">
+              <div className="mb-10">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl md:text-6xl font-bold tracking-tight">₹999</span>
-                  <span className="text-teal-300 text-lg">/year</span>
+                  <span className="text-6xl md:text-7xl font-bold tracking-tight">₹999</span>
+                  <span className="text-teal-200/80 text-lg font-medium">/ year</span>
                 </div>
-                <p className="text-teal-400 text-xs mt-1">Less than ₹3 per day</p>
+                <p className="text-teal-300 text-[13px] mt-2 font-medium">Less than ₹3 per day</p>
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3.5 relative z-10">
               <a
-                href="https://wa.me/919876543210?text=Hi%2C%20I%20want%20to%20subscribe%20to%20the%20Premium%20Dental%20Plan"
+                href="https://wa.me/918109424356?text=Hi%2C%20I%20want%20to%20subscribe%20to%20the%20Premium%20Dental%20Plan"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block text-center bg-white text-teal-900 font-bold py-4 rounded-xl hover:bg-warm-100 active:scale-[0.98] transition-all"
+                className="block text-center bg-white font-bold py-4 rounded-xl hover:bg-warm-50 active:scale-[0.98] transition-all shadow-xl shadow-teal-950/20"
+                style={{ color: '#0A363A' }}
               >
                 Subscribe Now
               </a>
               <a
-                href="tel:+919876543210"
+                href="tel:+918109424356"
                 className="block text-center text-sm text-teal-300 hover:text-white transition-colors py-2"
               >
-                or call +91 98765 43210
+                or call +91 81094 24356
               </a>
             </div>
           </div>

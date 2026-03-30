@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 export default function CallToAction() {
   return (
@@ -21,25 +22,25 @@ export default function CallToAction() {
           A healthier smile starts with one appointment.
         </h2>
         <p className="text-teal-200/80 leading-relaxed mb-10 max-w-lg mx-auto">
-          Whether you need a routine cleaning or want to join our dental plan, 
+          Whether you need a routine checkup or want to explore our care plans, 
           we're here. Book a visit — no commitment, no pressure.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
-            href="https://wa.me/919876543210?text=Hi%2C%20I'd%20like%20to%20book%20an%20appointment"
+            href="https://wa.me/918109424356?text=Hi%2C%20I'd%20like%20to%20book%20an%20appointment"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white text-teal-900 font-bold px-8 py-4 rounded-full hover:bg-warm-100 active:scale-[0.97] transition-all shadow-lg"
           >
             Book Now
           </a>
-          <a
-            href="#plan"
+          <Link
+            to="/plans"
             className="text-sm font-medium text-teal-300 underline underline-offset-4 decoration-teal-600 hover:text-white hover:decoration-white transition-colors"
           >
-            View the ₹999 plan
-          </a>
+            Explore Memberships
+          </Link>
         </div>
       </motion.div>
     </section>

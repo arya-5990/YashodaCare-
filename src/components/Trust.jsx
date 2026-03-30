@@ -1,99 +1,152 @@
 import { motion } from 'framer-motion';
-import { Stethoscope, MonitorSmartphone, Heart, MapPin } from 'lucide-react';
-import doctorImg from '../assets/doctor.png';
+import { ArrowRight, CheckCircle2, TrendingUp, ShieldCheck } from 'lucide-react';
 
-const POINTS = [
-  {
-    icon: Stethoscope,
-    title: '15+ years of experience',
-    desc: 'Our lead dentist has practiced since 2010 — not a fresh graduate learning on your teeth.',
-  },
-  {
-    icon: MonitorSmartphone,
-    title: 'Digital-first diagnosis',
-    desc: 'Intraoral cameras, digital X-rays, and on-screen explanations so you see what we see.',
-  },
-  {
-    icon: Heart,
-    title: 'Patient-first, always',
-    desc: "We never push unnecessary procedures. If you don't need it, we won't recommend it.",
-  },
-  {
-    icon: MapPin,
-    title: 'Central Indore location',
-    desc: 'On AB Road, easy to reach from Vijay Nagar, Palasia, and Sapna Sangeeta.',
-  },
-];
-
-export default function WhyUs() {
+export default function Trust() {
   return (
-    <section id="why" className="py-20 md:py-28 bg-teal-50/50">
-      <div className="max-w-6xl mx-auto px-5 md:px-8">
-
-        <div className="grid md:grid-cols-[1.1fr_1fr] gap-12 lg:gap-20 items-center">
-
-          {/* Image side */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.45 }}
-            className="relative order-2 md:order-1"
-          >
-            <div className="rounded-2xl overflow-hidden shadow-lg">
-              <img
-                src={doctorImg}
-                alt="Dr. Yashoda checking a patient's dental health"
-                className="w-full aspect-[4/5] object-cover object-top hover:scale-[1.02] transition-transform duration-700"
-              />
-            </div>
-            {/* Floating stat */}
-            <div className="absolute -bottom-5 -right-3 md:-right-6 bg-white rounded-xl shadow-lg border border-gray-100 px-5 py-4 text-center">
-              <p className="text-2xl font-bold text-teal-800">10K+</p>
-              <p className="text-[11px] text-gray-400 font-medium">Patients treated</p>
-            </div>
-          </motion.div>
-
-          {/* Text side */}
-          <div className="order-1 md:order-2">
+    <section id="about" className="py-24 md:py-32 bg-white relative">
+      <div className="max-w-7xl mx-auto px-5 md:px-8">
+        
+        <div className="grid lg:grid-cols-[5fr_7fr] gap-12 lg:gap-20 items-start">
+          
+          {/* Left: Sticky Founder Image */}
+          <div className="lg:sticky lg:top-32 relative">
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.4 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.6 }}
+              className="relative rounded-[2rem] overflow-hidden shadow-2xl shadow-teal-900/10 aspect-[4/5] md:aspect-[3/4]"
             >
-              <p className="text-xs font-semibold tracking-widest uppercase text-teal-700 mb-3">
-                Why choose us
-              </p>
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-teal-950 leading-snug mb-4">
-                We treat people, not just teeth.
+              <img 
+                src="/founder.webp" 
+                alt="Dr. Ankit Chourasiya" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-teal-950/90 via-teal-950/40 to-transparent pt-32 pb-8 px-8">
+                <p className="text-teal-200 font-semibold text-sm mb-1 uppercase tracking-wider">Founder / Lead Dentist</p>
+                <h3 className="text-white font-display text-2xl font-bold">Dr. Ankit Chourasiya</h3>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right: Narrative Content */}
+          <div className="space-y-16">
+            
+            {/* Part 1: Intro */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.5 }}
+            >
+              <h2 className="font-display text-3xl md:text-5xl font-bold text-teal-950 leading-[1.15] mb-8">
+                Making quality oral care accessible across India.
               </h2>
-              <p className="text-gray-500 leading-relaxed mb-10 max-w-md">
-                A dental visit shouldn't feel like an assembly line. We take our time, 
-                explain everything honestly, and make sure you're comfortable before any work begins.
-              </p>
+              <div className="space-y-5 text-gray-600 leading-relaxed text-[15px] md:text-[17px]">
+                <p>
+                  I am <strong className="text-teal-900 font-semibold">Dr. Ankit Chourasiya</strong>, a dental professional with 5+ years of clinical experience, dedicated to making quality oral healthcare accessible and affordable across India.
+                </p>
+                <p>
+                  At Yashoda Care+, we are supported by a highly experienced team with 10+ years of expertise across multiple dental specialties, ensuring comprehensive and advanced care under one roof.
+                </p>
+              </div>
             </motion.div>
 
-            <div className="space-y-6">
-              {POINTS.map(({ icon: Icon, title, desc }, i) => (
-                <motion.div
-                  key={title}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.3, delay: i * 0.07 }}
-                  className="flex gap-4"
-                >
-                  <div className="shrink-0 mt-1 w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center text-teal-800">
-                    <Icon size={18} strokeWidth={2} />
+            {/* Part 2: Scale and Vision */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="bg-warm-50 border border-warm-100 rounded-2xl p-8 mb-8">
+                <p className="text-sm font-semibold tracking-widest uppercase text-teal-700 mb-6">Our Growing Network</p>
+                
+                <div className="grid sm:grid-cols-2 gap-8 mb-8">
+                  <div>
+                    <p className="text-gray-500 text-sm mb-1">Current Presence</p>
+                    <p className="font-display text-3xl font-bold text-teal-950">30+ Cities</p>
+                    <p className="text-teal-700 font-medium">75+ Clinics</p>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-teal-950 text-sm mb-0.5">{title}</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                    <p className="text-gray-500 text-sm mb-1">Vision Ahead</p>
+                    <p className="font-display text-3xl font-bold text-teal-950">100+ Cities</p>
+                    <p className="text-coral font-medium">300+ Clinics</p>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+                </div>
+
+                <p className="text-gray-600 text-[15px] leading-relaxed italic">
+                  "Our goal is to build one of India's largest and most trusted dental care networks, ensuring that no individual is deprived of quality treatment due to cost or accessibility."
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Part 3: The Plan & Shift */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.5 }}
+            >
+              <h3 className="font-display text-2xl md:text-3xl font-bold text-teal-950 mb-4">
+                The ₹999 Plan – A Turning Point
+              </h3>
+              <p className="text-gray-600 text-[15px] md:text-[17px] leading-relaxed mb-8">
+                We have introduced our flagship ₹999 Dental Plan, designed to revolutionize how India approaches oral health. This is not just a plan — it's a preventive healthcare movement.
+              </p>
+
+              <div className="grid gap-3 mb-10">
+                {[
+                  'Encourages early diagnosis & regular checkups',
+                  'Prevents severe pain and dental emergencies',
+                  'Reduces future high-cost treatments',
+                  'Promotes awareness among families and youth'
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <CheckCircle2 size={18} className="text-teal-600 mt-0.5 shrink-0" />
+                    <span className="text-gray-700 font-medium">{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* The Mindset Shift Box */}
+              <div className="bg-teal-900 rounded-2xl p-6 sm:p-8 text-center sm:text-left flex flex-col sm:flex-row items-center gap-6 shadow-xl shadow-teal-900/10">
+                <div className="flex-1">
+                  <p className="text-teal-200 text-sm font-medium mb-1">A massive shift from</p>
+                  <p className="text-white font-display text-xl">"Treatment after pain"</p>
+                </div>
+                <ArrowRight className="hidden sm:block text-teal-500 opacity-50 shrink-0" size={24} />
+                <div className="hidden sm:block h-8 w-px bg-teal-800 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-teal-200 text-sm font-medium mb-1">Towards</p>
+                  <p className="text-teal-300 font-display text-xl font-semibold">"Prevention before problems"</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Part 4: Mission */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.5 }}
+              className="border-t border-gray-100 pt-12"
+            >
+              <div className="flex items-start gap-4">
+                <ShieldCheck className="text-teal-700 shrink-0 mt-1" size={28} />
+                <div>
+                  <h4 className="font-display text-xl font-bold text-teal-950 mb-3">Our Mission</h4>
+                  <p className="text-gray-600 text-[15px] md:text-[17px] leading-relaxed mb-6">
+                    To provide affordable, accessible, and high-quality dental care to every Indian, helping them live a stress-free, pain-free life.
+                  </p>
+                  <p className="text-teal-900 font-medium text-lg leading-snug">
+                    With strong clinical expertise, a growing nationwide presence, and a clear vision for the future, we are building not just clinics — <br className="hidden sm:block" />
+                    <span className="font-bold underline decoration-2 underline-offset-4 decoration-coral/40">we are building a healthier India.</span>
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
           </div>
         </div>
 

@@ -9,7 +9,7 @@ const WhatsAppIcon = () => (
 export default function WhatsAppButton() {
   return (
     <motion.a
-      href="https://wa.me/919876543210?text=Hi%2C%20I'd%20like%20to%20book%20an%20appointment"
+      href="https://wa.me/918109424356?text=Hi%2C%20I'd%20like%20to%20book%20an%20appointment"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"

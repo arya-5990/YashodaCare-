@@ -1,63 +1,111 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Menu, X, User } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X } from 'lucide-react';
 
-export default function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+const LINKS = [
+  { label: 'Home', href: '#home' },
+  { label: 'Plan', href: '#plan' },
+  { label: 'Why Us', href: '#why' },
+  { label: 'Contact', href: '#contact' },
+];
+
+export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const close = useCallback(() => setOpen(false), []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const fn = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', fn, { passive: true });
+    return () => window.removeEventListener('scroll', fn);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
   return (
-    <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'}`}>
-      <div className="container mx-auto px-6 md:px-12 flex justify-between items-center">
-        {/* Logo */}
-        <a href="#" className="flex items-center gap-2 text-2xl font-bold tracking-tight text-primary">
-          <span className="text-accent text-3xl leading-none">+</span>
-          <span>Yashoda Care</span>
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? 'bg-white/95 backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.05)] py-3'
+          : 'bg-transparent py-5'
+      }`}
+    >
+      <div className="max-w-6xl mx-auto px-5 md:px-8 flex items-center justify-between">
+        <a href="#home" className="flex items-center gap-1.5 group">
+          <span className="w-8 h-8 rounded-lg bg-teal-800 text-white flex items-center justify-center font-display font-bold text-sm group-hover:bg-teal-700 transition-colors">Y</span>
+          <span className="font-semibold text-teal-900 tracking-tight hidden sm:inline">Yashoda Dental</span>
         </a>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-700">
-          <a href="#home" className="hover:text-primary transition-colors">Home</a>
-          <a href="#plans" className="hover:text-primary transition-colors">Our Plans</a>
-          <a href="#about" className="hover:text-primary transition-colors">About Us</a>
-          
-          <button className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-            <User size={16} />
-            <span>Your Account</span>
-          </button>
+        <nav className="hidden md:flex items-center gap-8">
+          {LINKS.map(l => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="text-[13px] font-medium text-gray-500 hover:text-teal-800 transition-colors uppercase tracking-wide"
+            >
+              {l.label}
+            </a>
+          ))}
+          <a
+            href="#plan"
+            className="text-sm font-semibold text-white bg-teal-800 px-5 py-2.5 rounded-full hover:bg-teal-900 active:scale-[0.97] transition-all"
+          >
+            Get the Plan
+          </a>
         </nav>
 
-        {/* Mobile Menu Toggle */}
-        <button className="md:hidden text-primary" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+        <button
+          onClick={() => setOpen(p => !p)}
+          className="md:hidden p-2 -mr-2 text-teal-900"
+          aria-label="Menu"
+        >
+          {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
-      {/* Mobile Nav */}
-      {mobileMenuOpen && (
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          exit={{ opacity: 0, y: -20 }}
-          className="md:hidden absolute top-full left-0 w-full bg-white shadow-xl py-6 px-6 flex flex-col gap-4 border-t border-slate-100"
-        >
-          <a href="#home" className="text-lg font-medium text-slate-700 py-2 border-b border-slate-50" onClick={() => setMobileMenuOpen(false)}>Home</a>
-          <a href="#plans" className="text-lg font-medium text-slate-700 py-2 border-b border-slate-50" onClick={() => setMobileMenuOpen(false)}>Our Plans</a>
-          <a href="#about" className="text-lg font-medium text-slate-700 py-2 border-b border-slate-50" onClick={() => setMobileMenuOpen(false)}>About Us</a>
-          <button className="flex items-center justify-center gap-2 bg-primary text-white px-5 py-3 rounded-xl mt-4 w-full">
-            <User size={18} />
-            <span>Your Account</span>
-          </button>
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {open && (
+          <>
+            <motion.div
+              key="overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/15 md:hidden"
+              onClick={close}
+            />
+            <motion.nav
+              key="panel"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+              className="fixed top-0 right-0 h-dvh w-64 bg-white shadow-2xl md:hidden flex flex-col pt-20 px-6 pb-8"
+            >
+              {LINKS.map(l => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={close}
+                  className="py-3.5 text-base font-medium text-gray-700 border-b border-gray-50 hover:text-teal-800 transition-colors"
+                >
+                  {l.label}
+                </a>
+              ))}
+              <a
+                href="#plan"
+                onClick={close}
+                className="mt-6 text-center bg-teal-800 text-white py-3 rounded-xl font-semibold hover:bg-teal-900 transition-colors"
+              >
+                Get the Plan
+              </a>
+            </motion.nav>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

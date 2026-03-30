@@ -1,20 +1,47 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0D5C63;
-  --color-secondary: #78A083;
-  --color-accent: #E88D67;
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-serif: "Playfair Display", serif;
+  --color-teal-950: #062D30;
+  --color-teal-900: #094249;
+  --color-teal-800: #0D5C63;
+  --color-teal-700: #107078;
+  --color-teal-600: #15868E;
+  --color-teal-100: #D9F0F1;
+  --color-teal-50: #EFF9F9;
+  --color-warm-50: #FEFCFA;
+  --color-warm-100: #FAF6F1;
+  --color-warm-200: #F0E8DD;
+  --color-coral: #E88D67;
+  --color-coral-dark: #D47750;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Playfair Display", Georgia, serif;
 }
 
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', system-ui, sans-serif;
+html {
   scroll-behavior: smooth;
-  background-color: #f9fafb;
+  -webkit-font-smoothing: antialiased;
 }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: #374151;
+  background: #ffffff;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+a { text-decoration: none; color: inherit; }
+
+[id] { scroll-margin-top: 5rem; }
+
+::selection {
+  background: #0D5C6325;
+  color: #062D30;
+}
+
+/* Utility: hide scrollbar on testimonial scroll */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

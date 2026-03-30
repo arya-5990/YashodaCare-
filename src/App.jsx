@@ -1,22 +1,26 @@
-import Header from './components/Header';
+import Navbar from './components/Header';
 import Hero from './components/Hero';
-import Trust from './components/Trust';
-import Plans from './components/Plans';
-import Footer from './components/Footer';
-import FloatingWhatsApp from './components/FloatingWhatsApp';
+import PlanSection from './components/Plans';
+import WhyUs from './components/Trust';
+import ClinicExperience from './components/ClinicExperience';
+import CallToAction from './components/CallToAction';
+import ContactFooter from './components/Footer';
+import WhatsAppButton from './components/FloatingWhatsApp';
 
 function App() {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans selection:bg-accent/20 selection:text-primary">
-      <Header />
+    <>
+      <Navbar />
       <main>
         <Hero />
-        <Trust />
-        <Plans />
+        <PlanSection />
+        <WhyUs />
+        <ClinicExperience />
+        <CallToAction />
       </main>
-      <Footer />
-      <FloatingWhatsApp />
-    </div>
+      <ContactFooter />
+      <WhatsAppButton />
+    </>
   );
 }
 

@@ -1,12 +1,66 @@
 import { motion } from 'framer-motion';
 import { Check, Sparkles, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { collection, getDocs } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 
 export default function PlanSection() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState(null);
+
+  const handleSubscribe = async (plan) => {
+    if (!user) {
+      // Mandate login for subscriptions
+      navigate('/auth', { state: { message: 'Please log in to register your plan' } });
+      return;
+    }
+
+    setCheckoutLoading(plan.id);
+
+    try {
+      const response = await fetch('https://us-central1-ydcplans.cloudfunctions.net/createPhonePePaymentHttp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.user_id,
+          planId: plan.id,
+        }),
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        // Non-JSON error body
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || 'Payment API returned an error');
+        }
+      }
+
+      if (!response.ok) {
+        const message = data?.message || data?.error || 'Payment API returned an error';
+        throw new Error(message);
+      }
+      if (data?.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        alert("Payment Gateway failed to configure payload.");
+      }
+    } catch (err) {
+      console.error("Payment API Error:", err);
+      alert("Unable to reach secure payment server. Please ensure Firebase Functions are deployed.");
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -121,15 +175,18 @@ export default function PlanSection() {
               </div>
 
               <div className="space-y-4 relative z-10 mt-4">
-                <a
-                  href={`https://wa.me/918109424356?text=${encodeURIComponent(`Hi, I want to subscribe to the ${plan.title}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-center bg-white font-bold py-4 md:py-4.5 rounded-xl hover:bg-warm-50 active:scale-[0.98] transition-all shadow-xl shadow-teal-950/20 text-[16px]"
+                <button
+                  onClick={() => handleSubscribe(plan)}
+                  disabled={checkoutLoading === plan.id}
+                  className="w-full flex items-center justify-center gap-2 bg-white font-bold py-4 md:py-4.5 rounded-xl hover:bg-warm-50 active:scale-[0.98] transition-all shadow-xl shadow-teal-950/20 text-[16px] disabled:opacity-80 disabled:cursor-not-allowed"
                   style={{ color: '#0A363A' }}
                 >
-                  Subscribe Now
-                </a>
+                  {checkoutLoading === plan.id ? (
+                    <><Loader2 size={18} className="animate-spin text-teal-800" /> Connecting to PhonePe...</>
+                  ) : (
+                    'Subscribe Securely'
+                  )}
+                </button>
                 <a
                   href="tel:+918109424356"
                   className="block text-center text-sm text-teal-300 hover:text-white transition-colors py-2"

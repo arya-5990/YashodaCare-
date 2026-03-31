@@ -30,7 +30,9 @@ export default function Auth() {
     email: '',
     password: '',
     confirmPassword: '',
-    address: ''
+    address: '',
+    pincode: '',
+    referral: ''
   });
 
   const handleChange = (e) => {
@@ -75,14 +77,14 @@ export default function Auth() {
         navigate('/plans');
       } else {
         // --- MANUAL REGISTRATION ---
-        if (!form.name || !form.phone || !form.email || !form.password || !form.address) {
+        if (!form.name || !form.phone || !form.email || !form.password || !form.address || !form.pincode) {
           throw new Error('Please fill all fields');
         }
         if (form.password !== form.confirmPassword) {
           throw new Error('Passwords do not match');
         }
         if (form.password.length < 6) {
-          throw new Error('Password must be at least 6 characters');
+          throw new Error('Minimum 6 digit password required');
         }
 
         const usersRef = collection(db, 'users');
@@ -121,7 +123,9 @@ export default function Auth() {
           phone: form.phone,
           email: form.email,
           address: form.address,
+          pincode: form.pincode,
           password: hashedPassword,
+          referral: form.referral || '',
           createdAt: new Date().toISOString()
         });
 
@@ -191,6 +195,23 @@ export default function Auth() {
                       placeholder="123 AB Road, Indore"
                     />
                   </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Pincode</label>
+                    <input 
+                      name="pincode" type="text" inputMode="numeric" value={form.pincode} onChange={handleChange}
+                      className="w-full bg-warm-50 border border-gray-200 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 rounded-lg px-4 py-2.5 outline-none transition-all text-sm"
+                      placeholder="452001"
+                      maxLength={6}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Referral Code (Optional)</label>
+                    <input 
+                      name="referral" value={form.referral} onChange={handleChange}
+                      className="w-full bg-warm-50 border border-gray-200 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 rounded-lg px-4 py-2.5 outline-none transition-all text-sm uppercase transition-colors"
+                      placeholder="REF123"
+                    />
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -211,7 +232,8 @@ export default function Auth() {
               <input 
                 type={showPassword ? 'text' : 'password'} name="password" value={form.password} onChange={handleChange}
                 className="w-full bg-warm-50 border border-gray-200 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 rounded-lg pl-4 pr-10 py-2.5 outline-none transition-all text-sm"
-                placeholder="••••••••"
+                placeholder="••••••"
+                minLength={6}
               />
               <button
                 type="button"
@@ -238,7 +260,8 @@ export default function Auth() {
                     <input 
                       type={showPassword ? 'text' : 'password'} name="confirmPassword" value={form.confirmPassword} onChange={handleChange}
                       className="w-full bg-warm-50 border border-gray-200 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 rounded-lg pl-4 pr-10 py-2.5 outline-none transition-all text-sm"
-                      placeholder="••••••••"
+                      placeholder="••••••"
+                      minLength={6}
                     />
                     <button
                       type="button"
@@ -278,7 +301,7 @@ export default function Auth() {
               onClick={() => {
                 setIsLogin(!isLogin);
                 setError('');
-                setForm({ name: '', phone: '', email: '', password: '', confirmPassword: '', address: '' });
+                setForm({ name: '', phone: '', email: '', password: '', confirmPassword: '', address: '', pincode: '', referral: '' });
               }}
               className="text-teal-700 font-semibold hover:text-teal-900 transition-colors"
             >

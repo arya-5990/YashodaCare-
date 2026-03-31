@@ -4,87 +4,143 @@ import { Link } from 'react-router-dom';
 
 export default function Privacy() {
   return (
-    <main className="min-h-dvh pt-24 md:pt-32 pb-16 bg-warm-50 px-5">
-      <div className="max-w-3xl mx-auto">
+    <main className="min-h-dvh pt-32 md:pt-40 pb-24 bg-surface px-5 relative overflow-hidden">
+      {/* Background Depth Elements */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-surface-container-low rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none -z-10" />
+
+      <div className="max-w-4xl mx-auto">
         
-        <Link to="/" className="inline-flex items-center gap-2 text-teal-700 hover:text-teal-900 font-medium mb-8 transition-colors">
-          <ArrowLeft size={16} />
-          Back to Home
+        <Link to="/" className="inline-flex items-center gap-3 text-label-md text-primary font-bold uppercase tracking-widest mb-12 transition-all hover:gap-4">
+          <ArrowLeft size={18} />
+          Back to Retrieval
         </Link>
         
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl p-8 md:p-12 shadow-xl shadow-teal-900/5 border border-gray-100"
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="bg-surface-container-lowest rounded-[var(--radius-xl)] p-10 md:p-20 shadow-ambient outline-ghost relative overflow-hidden"
         >
-          <div className="mb-10 pb-8 border-b border-gray-100 flex items-center justify-between gap-4">
+          {/* Internal Header Layering */}
+          <div className="mb-20 pb-12 border-none flex flex-col md:flex-row items-start md:items-center justify-between gap-10">
             <div>
-              <h1 className="font-display text-3xl md:text-4xl font-bold text-teal-950 mb-4">Privacy Policy</h1>
-              <p className="text-gray-500">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+              <h1 className="text-display-lg text-primary mb-6 leading-none">Privacy<br /><span className="text-surface-tint">Protocol</span></h1>
+              <p className="text-label-md text-surface-tint tracking-[0.1em] uppercase font-bold">Document Version: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
             </div>
-            <div className="p-4 bg-teal-50 rounded-full shrink-0">
-              <ShieldCheck size={32} className="text-teal-700" />
+            <div className="p-8 bg-surface-container-low rounded-full outline-ghost shadow-ambient shrink-0">
+              <ShieldCheck size={48} className="text-tertiary" />
             </div>
           </div>
 
-          <div className="prose prose-teal prose-headings:font-display prose-headings:text-teal-950 leading-loose text-gray-700">
-            <p>
-              Your privacy is critically important to us. Yashoda Dental Care ("Yashoda Care+", "we", "us", or "our") respects your privacy regarding any information we may collect while operating our website and clinical services physically located in Indore.
-            </p>
-            <p className="mt-4">
-              This Privacy Policy applies to the data collected via our website (yashodacare.in or similar domains) and the Yashoda Care+ platform.
-            </p>
+          {/* Editorial Content Mapping */}
+          <div className="space-y-16 text-body-md text-surface-tint leading-relaxed max-w-none">
+            <div className="space-y-6">
+              <p className="text-title-lg text-primary font-normal leading-relaxed">
+                Your privacy is critically important to us. SmileSathi ("SmileSathi", "we", "us", or "our") respects your privacy regarding any data harvested via our digital systems and physical clinical site.
+              </p>
+              <p>
+                The following protocols outline our commitment to architectural reliability in data handling across smilesathi.com and the associated clinical network.
+              </p>
+            </div>
 
-            <h3 className="text-xl font-bold mt-8 mb-4">1. Information We Collect</h3>
-            <p>
-              We only collect information about you if we have a reason to do so—for example, to provide our Dental Health Plan, to communicate with you, or to make our clinic experience better.
-            </p>
-            <ul className="list-disc pl-5 space-y-2 mt-4 mb-6">
-              <li><strong>Personal Identifiers:</strong> Name, age, email address, phone number, and residential address provided during registration.</li>
-              <li><strong>Medical History:</strong> Basic dental health data, past treatments, and diagnostic imagery collected explicitly during appointments to provide safe and effective care.</li>
-              <li><strong>Account Credentials:</strong> Securely hashed passwords used to access your Yashoda Care+ profile. We do not store plain-text passwords.</li>
-            </ul>
+            <section className="space-y-8">
+              <div className="flex items-center gap-4">
+                <span className="text-label-md text-primary/30 font-bold tracking-widest">01</span>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Data Harvest Parameters</h3>
+              </div>
+              <p>
+                We only collect information about you if we have a reason to do so—for example, to provide our Dental Health Plan, to communicate with you, or to make our clinic experience better.
+              </p>
+              <div className="bg-surface-container-low p-8 rounded-[var(--radius-md)] outline-ghost space-y-6">
+                <ul className="space-y-6">
+                  <li className="flex gap-6">
+                    <span className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
+                    <div>
+                      <strong className="text-on-surface font-bold">Personal Identifiers:</strong>
+                      <p className="mt-1 opacity-80">Full legal name, authenticated phone number, and residential clinical site for logistics.</p>
+                    </div>
+                  </li>
+                  <li className="flex gap-6">
+                    <span className="w-2 h-2 rounded-full bg-tertiary mt-2 shrink-0" />
+                    <div>
+                      <strong className="text-on-surface font-bold">Medical History:</strong>
+                      <p className="mt-1 opacity-80">Basic dental health data and diagnostic imagery collected explicitly during clinical epoch.</p>
+                    </div>
+                  </li>
+                  <li className="flex gap-6">
+                    <span className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
+                    <div>
+                      <strong className="text-on-surface font-bold">Security Credentials:</strong>
+                      <p className="mt-1 opacity-80">Encrypted hash signatures for SmileSathi profile access. No plain-text storage is permitted.</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </section>
 
-            <h3 className="text-xl font-bold mt-8 mb-4">2. How We Use the Information</h3>
-            <p>
-              We use the information we collect to:
-            </p>
-            <ul className="list-disc pl-5 space-y-2 mt-4 mb-6">
-              <li>Verify your identity and activate your ₹999 Dental Health Plan.</li>
-              <li>Schedule clinic appointments and send timely SMS/WhatsApp reminders.</li>
-              <li>Maintain an accurate digital medical record for continuous safely optimized treatments.</li>
-              <li>Prevent fraudulent activity, spam, and unpermitted transfer of plans.</li>
-            </ul>
+            <section className="space-y-8">
+              <div className="flex items-center gap-4">
+                <span className="text-label-md text-primary/30 font-bold tracking-widest">02</span>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Operational Utilization</h3>
+              </div>
+              <p>
+                Data is utilized to architect a seamless patient experience:
+              </p>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="p-8 bg-surface-container-high rounded-[var(--radius-md)] outline-ghost">
+                  <p className="text-label-md text-primary font-bold uppercase tracking-widest mb-4">Clinical Logic</p>
+                  <p className="text-body-md opacity-80">Scheduling, medical record integrity, and diagnostic safety protocols.</p>
+                </div>
+                <div className="p-8 bg-surface-container-high rounded-[var(--radius-md)] outline-ghost">
+                  <p className="text-label-md text-primary font-bold uppercase tracking-widest mb-4">Financial Flow</p>
+                  <p className="text-body-md opacity-80">Membership activation, fraud prevention, and subscription management.</p>
+                </div>
+              </div>
+            </section>
 
-            <h3 className="text-xl font-bold mt-8 mb-4">3. Data Sharing and Protection</h3>
-            <p>
-              <strong>We do not sell our users' private personal or medical information.</strong> 
-            </p>
-            <p className="mt-4">
-              We share information about you in the limited circumstances spelled out below and with appropriate safeguards on your privacy:
-            </p>
-            <ul className="list-disc pl-5 space-y-2 mt-4 mb-6">
-              <li><strong>Our Employees and Independent Contractors:</strong> Who need to know the information to process it on our behalf or to provide dental services.</li>
-              <li><strong>Legal and Regulatory Requirements:</strong> We may disclose information in response to a court order or other governmental request.</li>
-            </ul>
+            <section className="space-y-8">
+              <div className="flex items-center gap-4">
+                <span className="text-label-md text-primary/30 font-bold tracking-widest">03</span>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Integrity Assurance</h3>
+              </div>
+              <p className="text-title-lg text-primary italic">
+                "We do not commoditize private medical or personal information."
+              </p>
+              <p>
+                Authorized access is restricted to essential clinical staff and certified independent contractors under strict confidentiality agreements. Regulatory disclosure is only executed under verified legal mandates.
+              </p>
+            </section>
 
-            <h3 className="text-xl font-bold mt-8 mb-4">4. Security Standards</h3>
-            <p>
-              While no online service is 100% secure, we work very hard to protect information about you against unauthorized access, use, alteration, or destruction, and take reasonable measures to do so. Your data is stored on secure, encrypted cloud databases (such as Google Firebase Firestore).
-            </p>
-
-            <h3 className="text-xl font-bold mt-8 mb-4">5. Accessing and Updating Information</h3>
-            <p>
-              If you have registered an account on our website, you may access, correct, or delete your personal information by logging into the `/profile` section of Yashoda Care+. Alternatively, you can request manual corrections by contacting our clinic via email.
-            </p>
-
-            <div className="mt-12 pt-8 border-t border-gray-100 bg-teal-50/50 p-6 rounded-2xl">
-              <p className="font-semibold text-teal-950 mb-2">Privacy Questions Issues?</p>
-              <p className="text-sm">If you have questions about our Privacy Policy or if you want to request data deletion, please contact our Data Protection Officer at:</p>
-              <ul className="text-sm mt-3 space-y-1">
-                <li><strong>Email:</strong> doctordeskofficial@gmail.com</li>
-                <li><strong>Phone:</strong> +91 81094-24356</li>
-              </ul>
+            <div className="mt-20 pt-12 border-t outline-ghost border-transparent border-dashed">
+              <div className="bg-primary rounded-[var(--radius-xl)] p-10 md:p-14 shadow-ambient relative overflow-hidden">
+                <div className="absolute bottom-0 right-0 w-80 h-80 bg-on-primary/5 rounded-full translate-x-1/3 translate-y-1/3" />
+                
+                <h4 className="text-headline-md text-on-primary font-bold uppercase tracking-widest mb-8">Clinical Privacy Desk</h4>
+                <p className="text-body-md text-surface-tint mb-10 max-w-lg italic">
+                  For formal data deletion requests or protocol inquiries, contact our Data Protection Officer immediately.
+                </p>
+                
+                <div className="space-y-6">
+                  <div className="flex items-center gap-6">
+                    <div className="w-12 h-12 bg-on-primary/10 rounded-full flex items-center justify-center text-surface-tint">
+                      <Mail size={20} />
+                    </div>
+                    <div>
+                      <p className="text-label-md text-on-primary/40 uppercase tracking-widest font-bold">Email</p>
+                      <a href="mailto:doctordeskofficial@gmail.com" className="text-title-lg text-on-primary hover:underline">doctordeskofficial@gmail.com</a>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="w-12 h-12 bg-on-primary/10 rounded-full flex items-center justify-center text-surface-tint">
+                      <Phone size={20} />
+                    </div>
+                    <div>
+                      <p className="text-label-md text-on-primary/40 uppercase tracking-widest font-bold">Concierge Line</p>
+                      <a href="tel:+918109424356" className="text-title-lg text-on-primary hover:underline">81094 24356</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>

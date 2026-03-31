@@ -15,7 +15,6 @@ export default function PlanSection() {
 
   const handleSubscribe = async (plan) => {
     if (!user) {
-      // Mandate login for subscriptions
       navigate('/auth', { state: { message: 'Please log in to register your plan' } });
       return;
     }
@@ -38,7 +37,6 @@ export default function PlanSection() {
       try {
         data = await response.json();
       } catch (e) {
-        // Non-JSON error body
         if (!response.ok) {
           const text = await response.text();
           throw new Error(text || 'Payment API returned an error');
@@ -68,10 +66,8 @@ export default function PlanSection() {
         const querySnapshot = await getDocs(collection(db, 'plans'));
         if (!querySnapshot.empty) {
           const plansData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          // Ensure they are displayed consistently, optionally you could sort by a 'order' field if you add one later
           setPlans(plansData);
         } else {
-          // Fallback if the database collection is completely empty, to preserve layout
           setPlans([{
             id: 'default-plan',
             title: 'Premium Dental Plan',
@@ -117,19 +113,15 @@ export default function PlanSection() {
 
   if (loading) {
     return (
-      <section id="plan" className="py-20 md:py-32 bg-white flex justify-center items-center min-h-[500px]">
-        <Loader2 size={36} className="animate-spin text-teal-800" />
+      <section id="plan" className="py-20 md:py-32 bg-surface flex justify-center items-center min-h-[500px]">
+        <Loader2 size={36} className="animate-spin text-tertiary" />
       </section>
     );
   }
 
   return (
-    <section id="plan" className="py-20 md:py-28 bg-white relative overflow-hidden">
-      {/* Subtle background shape */}
-      <div className="absolute top-0 right-0 w-72 h-72 bg-teal-50 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-5 md:px-8 relative z-10 space-y-12">
-
+    <section id="plan" className="py-24 md:py-32 bg-surface relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-5 md:px-8 relative z-10 space-y-16">
         {plans.map((plan, index) => (
           <motion.div
             key={plan.id}
@@ -137,100 +129,95 @@ export default function PlanSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.45, delay: index * 0.1 }}
-            className="grid lg:grid-cols-[1fr_1.2fr] gap-0 rounded-2xl overflow-hidden border border-gray-100 shadow-xl shadow-gray-100/50"
+            className="flex flex-col lg:flex-row gap-4"
           >
-            {/* Left — price & CTA */}
-            <div className="bg-teal-900 text-white p-8 md:py-16 md:px-14 flex flex-col justify-center gap-10 relative overflow-hidden">
-              {/* Soft decorative glow */}
-              <div className="absolute -top-24 -right-24 w-64 h-64 bg-teal-700 rounded-full blur-3xl opacity-30 pointer-events-none" />
-
-              <div className="relative z-10 flex flex-col gap-8">
+            {/* Left Box — Plan Name & Price */}
+            <div className="flex-1 bg-surface-container-lowest rounded-[var(--radius-xl)] p-10 md:p-14 shadow-ambient relative outline-ghost">
+              <div className="flex justify-between items-start mb-16">
                 <div>
-                  {plan.isPopular && (
-                    <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full text-[12px] font-semibold tracking-wide text-teal-50 mb-6 border border-white/5">
-                      <Sparkles size={13} />
-                      Most Popular
-                    </div>
-                  )}
-
-                  <h3 className="font-display text-3xl md:text-5xl font-bold mb-4 leading-tight">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full mb-3 inline-block bg-surface-container text-surface-tint outline-ghost">
+                    {plan.planType?.toLowerCase() === 'family' ? 'Multi-User' : 'Essential'}
+                  </span>
+                  <h3 className="text-display-md text-primary mb-2 text-3xl md:text-5xl font-display font-medium">
                     {plan.title}
                   </h3>
-                  <p className="text-teal-100 text-base md:text-[17px] leading-relaxed max-w-sm">
+                  <p className="text-body-md text-surface-tint max-w-sm">
                     {plan.description}
                   </p>
                 </div>
-
-                <div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-6xl md:text-8xl font-bold tracking-tight">₹{plan.discountedPrice}</span>
-                    <span className="text-teal-200/80 text-xl font-medium">/ year</span>
+                {plan.isPopular && (
+                  <div className="trust-shield">
+                    <Sparkles size={16} className="text-tertiary" />
+                    <span className="text-label-md text-primary font-bold">Recommended</span>
                   </div>
-                  {plan.actualPrice && (
-                    <p className="text-teal-300 text-[15px] mt-3 font-medium">
-                      Normally <span className="line-through decoration-teal-400">₹{plan.actualPrice}</span>
-                    </p>
-                  )}
-                </div>
+                )}
               </div>
 
-              <div className="space-y-4 relative z-10 mt-4">
+              <div>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-display-lg text-primary">₹{plan.discountedPrice}</span>
+                  <span className="text-title-lg text-surface-tint">
+                    {plan.title?.toLowerCase().includes('trial') ? '/ 6 month' : '/ yr'}
+                  </span>
+                </div>
+                {plan.actualPrice && (
+                  <p className="text-body-md text-surface-tint mt-2">
+                    Standard value <span className="line-through decoration-outline-variant">₹{plan.actualPrice}</span>
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-12 pt-8">
                 <button
                   onClick={() => handleSubscribe(plan)}
                   disabled={checkoutLoading === plan.id}
-                  className="w-full flex items-center justify-center gap-2 bg-white font-bold py-4 md:py-4.5 rounded-xl hover:bg-warm-50 active:scale-[0.98] transition-all shadow-xl shadow-teal-950/20 text-[16px] disabled:opacity-80 disabled:cursor-not-allowed"
-                  style={{ color: '#0A363A' }}
+                  className="btn-primary w-full disabled:opacity-80 disabled:cursor-not-allowed"
                 >
                   {checkoutLoading === plan.id ? (
-                    <><Loader2 size={18} className="animate-spin text-teal-800" /> Connecting to PhonePe...</>
+                    <><Loader2 size={18} className="animate-spin text-on-primary" /> Securing Transaction...</>
                   ) : (
-                    'Subscribe Securely'
+                    'Secure My Membership'
                   )}
                 </button>
-                <a
-                  href="tel:+918109424356"
-                  className="block text-center text-sm text-teal-300 hover:text-white transition-colors py-2"
-                >
-                  or call +91 81094 24356
-                </a>
               </div>
             </div>
 
-            {/* Right — features */}
-            <div className="bg-warm-50 p-8 md:p-14 flex flex-col justify-center">
-              <p className="text-sm font-semibold uppercase tracking-widest text-teal-800/60 mb-8">
-                What's included
-              </p>
-
-              <ul className="space-y-6">
-                {(plan.includes || []).map((feat, i) => (
-                  <motion.li
-                    key={i}
-                    initial={{ opacity: 0, x: 12 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: i * 0.06 }}
-                    className="flex items-start gap-3.5"
-                  >
-                    <div className="mt-0.5 w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center shrink-0">
-                      <Check size={14} className="text-teal-800" strokeWidth={3} />
-                    </div>
-                    <span className="text-gray-800 text-[16px] leading-snug font-medium pt-0.5">{feat}</span>
-                  </motion.li>
-                ))}
-              </ul>
+            {/* Right Box — Features & Clarification */}
+            <div className="flex-1 bg-surface-container-low rounded-[var(--radius-xl)] p-10 md:p-14 outline-ghost flex flex-col justify-between">
+              <div>
+                <p className="text-label-md uppercase tracking-[0.1em] text-primary/60 mb-8 font-semibold">
+                  Clinical Benefits
+                </p>
+                
+                <ul className="space-y-6">
+                  {(plan.includes || []).map((feat, i) => (
+                    <motion.li
+                      key={i}
+                      initial={{ opacity: 0, x: 12 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.3, delay: i * 0.06 }}
+                      className="flex items-start gap-4"
+                    >
+                      <div className="mt-1 w-6 h-6 rounded-full bg-tertiary-fixed flex items-center justify-center shrink-0">
+                        <Check size={14} className="text-tertiary-container" strokeWidth={3} />
+                      </div>
+                      <span className="text-body-md text-on-surface font-medium pt-0.5">{feat}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
 
               {plan.note && (
-                <div className="mt-10 pt-8 border-t border-gray-200">
-                  <p className="text-[13px] font-medium text-gray-400 leading-relaxed italic">
-                    * {plan.note}
+                <div className="mt-12 px-6 py-4 bg-surface rounded-[var(--radius-md)] outline-ghost">
+                  <p className="text-label-md text-surface-tint italic">
+                    {plan.note}
                   </p>
                 </div>
               )}
             </div>
           </motion.div>
         ))}
-
       </div>
     </section>
   );

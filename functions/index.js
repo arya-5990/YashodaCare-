@@ -216,6 +216,16 @@ exports.phonePeWebhook = functions.https.onRequest(async (req, res) => {
 							plan_title: planTitle,
 							plan_purchased_at: new Date().toISOString(),
 						});
+						
+					// Store successful transaction in purchases collection
+					await admin
+						.firestore()
+						.collection("purchases")
+						.doc(transactionId)
+						.set({
+							...txnSnap.data(),
+							status: "SUCCESS"
+						});
 				}
 			}
 

@@ -13,6 +13,21 @@ export default function PlanSection() {
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(null);
 
+  // Load Razorpay SDK dynamically
+  const loadRazorpayScript = () =>
+    new Promise((resolve) => {
+      if (document.getElementById('razorpay-sdk')) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.id = 'razorpay-sdk';
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
   const handleSubscribe = async (plan) => {
     if (!user) {
       navigate('/auth', { state: { message: 'Please log in to register your plan' } });
@@ -22,39 +37,70 @@ export default function PlanSection() {
     setCheckoutLoading(plan.id);
 
     try {
-      const response = await fetch('https://us-central1-ydcplans.cloudfunctions.net/createPhonePePaymentHttp', {
+      // 1. Load Razorpay SDK
+      const loaded = await loadRazorpayScript();
+      if (!loaded) throw new Error('Failed to load payment SDK. Please check your connection.');
+
+      // 2. Create order on backend
+      const orderRes = await fetch('https://us-central1-ydcplans.cloudfunctions.net/createRazorpayOrder', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.user_id,
-          planId: plan.id,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.user_id, planId: plan.id }),
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (e) {
-        if (!response.ok) {
-          const text = await response.text();
-          throw new Error(text || 'Payment API returned an error');
-        }
-      }
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) throw new Error(orderData?.error || 'Could not create payment order');
 
-      if (!response.ok) {
-        const message = data?.message || data?.error || 'Payment API returned an error';
-        throw new Error(message);
-      }
-      if (data?.redirectUrl) {
-        window.location.href = data.redirectUrl;
-      } else {
-        alert("Payment Gateway failed to configure payload.");
-      }
+      // 3. Open Razorpay modal
+      await new Promise((resolve, reject) => {
+        const rzp = new window.Razorpay({
+          key: orderData.keyId,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: 'SmileSathi',
+          description: plan.title || 'Membership Plan',
+          order_id: orderData.orderId,
+          prefill: {
+            name: user.displayName || '',
+            email: user.email || '',
+          },
+          theme: { color: '#74B72E' },
+          handler: async (response) => {
+            try {
+              // 4. Verify payment signature on backend
+              const verifyRes = await fetch('https://us-central1-ydcplans.cloudfunctions.net/verifyRazorpayPayment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  userId: user.user_id,
+                  planId: plan.id,
+                }),
+              });
+
+              const verifyData = await verifyRes.json();
+              if (!verifyRes.ok) throw new Error(verifyData?.error || 'Payment verification failed');
+
+              resolve();
+              navigate('/profile', { state: { paymentSuccess: true } });
+            } catch (err) {
+              reject(err);
+            }
+          },
+          modal: {
+            ondismiss: () => reject(new Error('Payment cancelled')),
+          },
+        });
+        rzp.open();
+      });
+
     } catch (err) {
-      console.error("Payment API Error:", err);
-      alert("Unable to reach secure payment server. Please ensure Firebase Functions are deployed.");
+      if (err.message !== 'Payment cancelled') {
+        console.error('Payment Error:', err);
+        alert(err.message || 'Payment failed. Please try again.');
+      }
     } finally {
       setCheckoutLoading(null);
     }
@@ -153,18 +199,28 @@ export default function PlanSection() {
                 )}
               </div>
 
-              <div>
-                <div className="flex items-baseline gap-3">
-                  <span className="text-display-lg text-primary">₹{plan.discountedPrice}</span>
-                  <span className="text-title-lg text-surface-tint">
-                    {plan.title?.toLowerCase().includes('trial') ? '/ 6 month' : '/ yr'}
+              <div className="mt-auto">
+                {plan.actualPrice && (
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl md:text-3xl font-black text-slate-400 line-through decoration-[--color-accent-joy] decoration-[3px]">
+                      ₹{plan.actualPrice}
+                    </span>
+                    <span className="text-sm font-black text-[#0A1929] bg-[#74B72E] px-3 py-1 rounded-full shadow-ambient drop-shadow-sm">
+                      SAVE ₹{plan.actualPrice - plan.discountedPrice}!
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-baseline gap-2">
+                  <span className="text-6xl md:text-7xl font-black text-primary tracking-tighter">
+                    ₹{plan.discountedPrice}
+                  </span>
+                  <span className="text-xl text-surface-tint font-bold">
+                    {plan.title?.toLowerCase().includes('trial') ? '/ 6 months' : '/ year'}
                   </span>
                 </div>
-                {plan.actualPrice && (
-                  <p className="text-body-md text-surface-tint mt-2">
-                    Standard value <span className="line-through decoration-outline-variant">₹{plan.actualPrice}</span>
-                  </p>
-                )}
+                <p className="text-sm text-[#74B72E] font-bold mt-3 flex items-center gap-1.5">
+                  <Sparkles size={16} /> Limited time intro pricing
+                </p>
               </div>
 
               <div className="mt-12 pt-8">
@@ -188,7 +244,7 @@ export default function PlanSection() {
                 <p className="text-label-md uppercase tracking-[0.1em] text-primary/60 mb-8 font-semibold">
                   Clinical Benefits
                 </p>
-                
+
                 <ul className="space-y-6">
                   {(plan.includes || []).map((feat, i) => (
                     <motion.li
@@ -206,6 +262,23 @@ export default function PlanSection() {
                     </motion.li>
                   ))}
                 </ul>
+
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.4 }}
+                  className="mt-10 p-5 rounded-xl bg-gradient-to-br from-[#EEF9F1] to-[#E2F5E9] border border-[#74B72E]/30 relative overflow-hidden shadow-sm"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#74B72E]/10 rounded-full blur-2xl -translate-y-10 translate-x-10"></div>
+                  <h4 className="text-[#0A1929] font-bold mb-1.5 flex items-center gap-2">
+                    <Sparkles size={16} className="text-[#74B72E]" />
+                    Zero Risk Guarantee
+                  </h4>
+                  <p className="text-surface-tint text-sm font-medium leading-relaxed">
+                    If you don't use your plan this year, your benefits automatically <span className="text-primary font-bold">carry forward</span> to the next year—along with a <span className="text-primary font-bold">complimentary 6-month extension!</span>
+                  </p>
+                </motion.div>
               </div>
 
               {plan.note && (

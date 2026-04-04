@@ -1,21 +1,14 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Sparkles } from 'lucide-react';
 import heroImg from '../assets/hero_image.png';
 
 export default function Hero() {
   return (
-    <section id="home" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 min-h-screen flex items-center bg-primary overflow-hidden">
+    <section id="home" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 min-h-screen flex items-center bg-surface bg-bokeh-teal overflow-hidden">
       
-      {/* Background Image Layer with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=2000" 
-          alt="Professional Dental Environment" 
-          className="w-full h-full object-cover opacity-30"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-transparent" />
-      </div>
+      {/* Background Bokeh Layer */}
+      <div className="absolute inset-0 z-0 pointer-events-none bg-bokeh-teal opacity-60 mix-blend-multiply" />
 
       <div className="max-w-7xl mx-auto px-5 md:px-8 w-full grid lg:grid-cols-[1.2fr_0.8fr] gap-20 items-center relative z-10">
         
@@ -23,48 +16,47 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="max-w-2xl"
         >
+          {/* Tagline Special Treatment */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[--color-accent-joy] bg-[rgba(245,130,32,0.05)] text-[--color-accent-joy] font-medium text-sm mb-6">
+            <Sparkles size={16} />
+            <span className="italic">Aapki Smile Ka Lifetime Partner</span>
+          </div>
 
-          <h1 className="text-display-lg text-on-primary mb-4 leading-[1.05]">
-            Apki Smile Ka<br />
-            <span className="text-tertiary italic">Lifetime</span> Partner 😊
+          <h1 className="text-display-lg text-primary mb-6 leading-[1.05]">
+            India's Most Trusted <br />
+            <span className="text-tertiary">Dental Partner</span>
           </h1>
 
-          <p className="text-title-lg text-surface-tint mb-12 max-w-lg font-normal opacity-80 leading-relaxed">
-            India ka sabse trusted dental membership plan – <span className="text-tertiary font-bold">₹999</span> mein
+          <p className="text-title-lg text-surface-tint mb-12 max-w-lg font-normal leading-relaxed">
+            Experience premium, clinical-grade dental care. Join the SmileSathi membership plan for just <span className="font-bold premium-metal-text">₹999</span>.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-6 mt-8">
             <Link
               to="/plans"
-              className="px-8 py-4 rounded-full bg-white text-blue-900 font-bold hover:bg-blue-50 transition-colors shadow-lg flex items-center justify-center w-full sm:w-auto min-w-[200px]"
+              className="btn-primary rounded-full px-8 py-4 shadow-ambient font-bold border border-[--color-brand-blue] text-white hover:bg-[--color-brand-blue] w-full sm:w-auto"
             >
-              Join SmileSathi @ ₹999 <ShieldCheck className="ml-2 w-5 h-5" />
+              Join SmileSathi <ShieldCheck className="ml-2 w-5 h-5 text-[--color-accent-joy]" />
             </Link>
-            {/* <Link
-              to="/auth"
-              className="px-8 py-4 rounded-full bg-transparent border-2 border-white text-white font-bold hover:bg-white/10 transition-colors flex items-center justify-center w-full sm:w-auto min-w-[200px]"
-            >
-              Find a Dentist
-            </Link> */}
           </div>
         </motion.div>
 
       </div>
 
-      {/* Right Side: Hero Image (Absolutely anchored to bottom right) */}
+      {/* Right Side: Hero Image */}
       <motion.div
          initial={{ opacity: 0, y: 50 }}
          animate={{ opacity: 1, y: 0 }}
-         transition={{ duration: 0.8, delay: 0.1 }}
-         className="hidden lg:block absolute bottom-0 right-[-8%] xl:right-[-15%] 2xl:right-[-20%] h-[85vh] max-h-[1000px] w-auto z-10 pointer-events-none"
+         transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+         className="hidden lg:block absolute -bottom-12 right-[-5%] xl:right-[-15%] h-[85vh] max-h-[900px] w-auto z-10 pointer-events-none"
       >
         <img 
           src={heroImg} 
-          alt="SmileSathi Hero Presentation" 
-          className="h-full w-auto object-contain object-right-bottom drop-shadow-[0_45px_45px_rgba(0,0,0,0.6)] transform transition-transform duration-700 hover:scale-[1.03] pointer-events-auto origin-bottom-right"
+          alt="Radiant Smile" 
+          className="h-full w-auto object-contain object-right-bottom drop-shadow-2xl transform transition-transform duration-700 hover:scale-[1.02] pointer-events-auto origin-bottom-right"
         />
       </motion.div>
     </section>

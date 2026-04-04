@@ -1,20 +1,9 @@
 import { Link } from 'react-router-dom';
-
-const Twitter = ({ size = 24, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
-  </svg>
-);
+import { Mail, Phone, MapPin, Stethoscope } from 'lucide-react';
 
 const Instagram = ({ size = 24, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
-  </svg>
-);
-
-const Linkedin = ({ size = 24, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>
   </svg>
 );
 
@@ -27,58 +16,87 @@ export default function Footer() {
       links: [
         { label: 'Privacy Policy', href: '/privacy' },
         { label: 'Terms of Service', href: '/terms' },
-        { label: 'Contact Us', href: '/contact' },
-      ],
-    },
-    {
-      title: 'Portals',
-      links: [
         { label: 'Member Login', href: '/auth' },
-        { label: 'Provider Portal', href: '/portal' },
-        { label: 'Broker Portal', href: '/portal' },
-      ],
-    },
-    {
-      title: 'Support',
-      links: [
-        { label: 'Help Center', href: '/help' },
-        { label: 'Accessibility', href: '/accessibility' },
       ],
     },
   ];
 
   return (
-    <footer className="bg-surface pt-24 pb-12 overflow-hidden border-t outline-ghost border-transparent">
-      <div className="max-w-7xl mx-auto px-5 md:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 md:gap-8 mb-20">
+    <footer className="relative bg-primary text-white pt-24 pb-12 overflow-hidden border-t-0">
+      {/* Subtle Blue Light Spill / Bokeh from top */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[--color-brand-blue] to-transparent opacity-50"></div>
+      <div className="absolute top-[-150px] left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-[--color-brand-blue] opacity-20 blur-[100px] rounded-[100%] pointer-events-none"></div>
+
+      <div className="relative max-w-7xl mx-auto px-5 md:px-8 z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 md:gap-12 mb-20">
           
-          <div className="col-span-2 lg:col-span-2 space-y-8">
-            <Link to="/" className="flex items-center gap-3">
-              <span className="text-2xl font-black text-primary tracking-tighter">SmileSathi</span>
+          <div className="lg:col-span-2 space-y-8">
+            <Link to="/" className="flex items-center gap-2 group">
+              <span className="text-3xl font-black tracking-tighter text-white">
+                Smile<span className="text-tertiary">Sathi</span>
+              </span>
             </Link>
-            <p className="text-label-md text-surface-tint max-w-xs leading-relaxed">
-              © {year} SmileSathi. All rights reserved. Apki smile ka lifetime partner.
+            <p className="text-label-md text-primary-fixed-dim leading-relaxed font-light italic opacity-80 max-w-sm">
+              Aapki Smile Ka Lifetime Partner
             </p>
+            <p className="text-label-md text-primary-fixed-dim max-w-xs leading-relaxed mt-4">
+              Premium clinical-grade dental care accessible and simple.
+            </p>
+            
             <div className="flex gap-4">
-              <a href="https://twitter.com" className="w-10 h-10 rounded-full border border-surface-container-high flex items-center justify-center text-primary transition-all">
-                <Twitter size={18} />
-              </a>
-              <a href="https://www.instagram.com/smilesathiofficial_/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-surface-container-high flex items-center justify-center text-primary transition-all">
+              <a href="https://www.instagram.com/smilesathiofficial_/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-primary-fixed-dim/30 flex items-center justify-center text-primary-fixed-dim hover:text-white transition-all hover:border-[--color-brand-blue]">
                 <Instagram size={18} />
-              </a>
-              <a href="https://linkedin.com" className="w-10 h-10 rounded-full border border-surface-container-high flex items-center justify-center text-primary transition-all">
-                <Linkedin size={18} />
               </a>
             </div>
           </div>
 
+          <div className="lg:col-span-1 space-y-6">
+            <h4 className="text-label-md font-black text-white uppercase tracking-widest opacity-90">Contact Us</h4>
+            <ul className="space-y-5">
+              <li className="flex items-center gap-3 text-label-md text-primary-fixed-dim">
+                <span className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                  <Stethoscope size={14} className="text-[#a3e635]" />
+                </span>
+                <span className="font-semibold text-white/90">Dr. Ankit Chourasiya</span>
+              </li>
+              <li>
+                <a href="tel:918109424356" className="flex items-center gap-3 text-label-md text-primary-fixed-dim hover:text-white transition-colors">
+                  <span className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                    <Phone size={14} className="text-[--color-accent-joy]" />
+                  </span>
+                  +91 81094-24356
+                </a>
+              </li>
+              <li>
+                <a href="mailto:smilesathiofficial@gmail.com" className="flex text-label-md text-primary-fixed-dim hover:text-white transition-colors gap-3 items-center">
+                  <span className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                    <Mail size={14} className="text-[--color-brand-blue]" />
+                  </span>
+                  <span className="break-all">smilesathiofficial@gmail.com</span>
+                </a>
+              </li>
+              <li className="flex items-start gap-3 text-label-md text-primary-fixed-dim leading-relaxed">
+                <span className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 mt-0.5">
+                  <MapPin size={14} className="text-tertiary" />
+                </span>
+                <span>
+                  First Floor, Plot No. 17,<br />
+                  Above New Globas Medical,<br />
+                  Opposite Satish Kirana, Gori Nagar,<br />
+                  New Gouri Nagar, Sukhliya,<br />
+                  Indore, Madhya Pradesh – 452010
+                </span>
+              </li>
+            </ul>
+          </div>
+
           {sections.map(section => (
             <div key={section.title} className="space-y-6">
-              <h4 className="text-label-md font-black text-primary uppercase tracking-widest">{section.title}</h4>
+              <h4 className="text-label-md font-black text-white uppercase tracking-widest opacity-90">{section.title}</h4>
               <ul className="space-y-4">
                 {section.links.map(link => (
                   <li key={link.label}>
-                    <Link to={link.href} className="text-label-md text-surface-tint hover:text-primary transition-colors">
+                    <Link to={link.href} className="text-label-md text-primary-fixed-dim hover:text-[--color-brand-blue] transition-colors">
                       {link.label}
                     </Link>
                   </li>
@@ -86,6 +104,23 @@ export default function Footer() {
               </ul>
             </div>
           ))}
+        </div>
+        
+        <div className="border-t border-white/10 pt-8 mt-12 flex flex-col md:flex-row items-center justify-between">
+          <p className="text-label-md text-primary-fixed-dim opacity-70">
+            © {year} SmileSathi. All rights reserved.
+          </p>
+          <p className="text-label-md text-primary-fixed-dim opacity-70 mt-4 md:mt-0 flex items-center flex-wrap gap-1.5 justify-center md:justify-end">
+            Made with <span className="text-[--color-accent-joy] animate-pulse">❤</span> by
+            <a 
+              href="https://www.linkedin.com/in/arya-sharma-1963b030a" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-white hover:text-[--color-brand-blue] transition-colors font-semibold ml-0.5"
+            >
+              Arya Sharma
+            </a>
+          </p>
         </div>
       </div>
     </footer>

@@ -1,30 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  --color-surface: #f7f9fb;
-  --color-surface-container-low: #f2f4f6;
+  /* Surfaces & Backgrounds */
+  --color-surface: #ffffff; /* Clinical White */
+  --color-surface-container-low: #f8fafc;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container: #ebeff3;
-  --color-surface-container-high: #e1e5ea;
+  --color-surface-container: #f1f5f9;
+  --color-surface-container-high: #e2e8f0;
   
-  --color-tertiary-container: #003208;
-  --color-tertiary-fixed: #e2fced;
-  --color-tertiary: #04b35e;
-  --color-tertiary-fixed-variant: #028f4a;
-
-  --color-primary: #041627;
-  --color-primary-container: #1a2b3c;
+  /* Primary (Brand & Joy - Navy/Blue) */
+  --color-primary: #0A1929; /* Deep navy */
+  --color-primary-container: #132f4c;
   --color-primary-fixed-dim: #c5c9d1;
   --color-on-primary: #ffffff;
-  --color-on-surface: #191c1e;
+  --color-on-surface: #0f172a;
+  --color-brand-blue: #2A8EDD; /* Vibrant Blue for professionalism */
   
-  --color-outline-variant: #c4c6cd;
-  --color-surface-tint: #4f6073;
+  /* Tertiary (Joy & Health - Green) */
+  --color-tertiary: #74B72E; /* Green for health */
+  --color-tertiary-container: #003208;
+  --color-tertiary-fixed: #e2fced;
+  --color-tertiary-fixed-variant: #028f4a;
 
-  --color-error: #ba1a1a;
-  --color-error-container: #ffdad6;
+  /* The Joy Accent (Orange) */
+  --color-accent-joy: #F58220; /* Vibrant orange / gold */
+  
+  /* System */
+  --color-outline-variant: #cbd5e1;
+  --color-surface-tint: #475569;
+  --color-error: #ef4444;
+  --color-error-container: #fee2e2;
 
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter", "Quicksand", system-ui, -apple-system, sans-serif;
   --font-display: "Manrope", sans-serif;
 
   --radius-md: 0.75rem;
@@ -53,12 +60,14 @@
     font-size: 3.5rem;
     letter-spacing: -0.02em;
     line-height: 1.15;
+    color: var(--color-primary);
   }
   .text-headline-md {
     font-family: var(--font-display);
     font-weight: 600;
     font-size: 1.75rem;
     line-height: 1.25;
+    color: var(--color-primary);
   }
   .text-title-lg {
     font-family: var(--font-sans);
@@ -79,61 +88,90 @@
     line-height: 1.25;
   }
 
+  /* CTAs & Buttons */
   .btn-primary {
     background-color: var(--color-primary);
     color: var(--color-on-primary);
     border-radius: var(--radius-md);
     padding: 0.875rem 2rem;
-    font-weight: 500;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     box-shadow: inset 0 2px 0 0 rgba(255, 255, 255, 0.15);
     transition: all 0.2s ease-out;
   }
+  
+  .btn-primary:hover {
+    transform: scale(1.03);
+  }
 
   .btn-secondary {
     background-color: var(--color-tertiary-fixed);
-    color: var(--color-tertiary-container);
+    color: var(--color-tertiary);
     border-radius: var(--radius-md);
     padding: 0.875rem 2rem;
-    font-weight: 500;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease-out;
+  }
+
+  .btn-secondary:hover {
+    transform: scale(1.03);
   }
 
   .btn-tertiary {
     background-color: transparent;
-    color: var(--color-primary);
+    color: var(--color-brand-blue);
     border-radius: var(--radius-md);
     padding: 0.875rem 2rem;
-    font-weight: 500;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease-out;
+    transition: color 0.2s ease-out, transform 0.2s ease-out;
   }
   
   .btn-tertiary:hover {
-    text-decoration: underline;
+    color: var(--color-accent-joy);
+  }
+
+  /* Premium Metal Effects */
+  .premium-metal-bg {
+    background: linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #AA8000 100%);
+  }
+  .premium-metal-border {
+    border: 1px solid #D4AF37;
+  }
+  .premium-metal-text {
+    background: linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #AA8000 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Bokeh & Blurs */
+  .bg-bokeh-teal {
+    background: radial-gradient(circle at 50% 50%, rgba(42, 142, 221, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
   }
 
   .glass-header {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    border-bottom: 2px solid transparent; /* Placeholder for golden swoosh integration */
   }
 
   .shadow-ambient {
-    box-shadow: 0 10px 40px rgba(25, 28, 30, 0.06);
+    box-shadow: 0 10px 40px rgba(10, 25, 41, 0.04);
   }
 
   .outline-ghost {
-    outline: 1px solid rgba(196, 198, 205, 0.15);
+    outline: 1px solid rgba(10, 25, 41, 0.08);
   }
 
+  /* Status Cards / Pill */
   .trust-shield {
     display: inline-flex;
     align-items: center;
@@ -142,8 +180,8 @@
     border-radius: 9999px;
     background-color: rgba(255, 255, 255, 0.9);
     color: var(--color-primary);
-    box-shadow: 0 10px 30px rgba(25, 28, 30, 0.08);
-    border: 1px solid rgba(196, 198, 205, 0.65);
+    box-shadow: 0 10px 30px rgba(10, 25, 41, 0.06);
+    border: 1px solid rgba(10, 25, 41, 0.1);
   }
 
   .no-scrollbar::-webkit-scrollbar { display: none; }

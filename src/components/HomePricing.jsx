@@ -120,26 +120,26 @@ export default function HomePricing() {
                 transition={{ delay: idx * 0.1 }}
                 className={`relative flex flex-col p-10 rounded-[2.5rem] h-full transition-transform hover:scale-[1.02] ${
                   isHighlighted 
-                    ? 'bg-primary text-on-primary shadow-2xl z-10 border-none' 
+                    ? 'premium-metal-bg text-primary shadow-2xl z-10 border-none' 
                     : 'bg-surface-container-lowest text-primary outline-ghost shadow-ambient'
                 }`}
               >
                 {isHighlighted && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#a3e635] text-primary text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-full shadow-lg">
-                    Most Preferred
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-full shadow-lg">
+                    Premium Member Choice
                   </div>
                 )}
 
                 <div className="mb-4">
                   <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full mb-6 inline-block ${
-                    isHighlighted ? 'bg-white/10 text-tertiary-fixed border border-white/10' : 'bg-surface-container text-surface-tint outline-ghost'
+                    isHighlighted ? 'bg-white/30 text-primary border border-primary/20' : 'bg-surface-container text-surface-tint outline-ghost'
                   }`}>
                     {plan.planType?.toLowerCase() === 'family' ? 'Multi-User' : 'Essential'}
                   </span>
                   <h3 className="text-display-lg text-4xl mb-3 font-display font-medium tracking-tight">
                     {plan.title}
                   </h3>
-                  <p className={`text-body-md ${isHighlighted ? 'text-white/70' : 'text-surface-tint'}`}>
+                  <p className={`text-body-md ${isHighlighted ? 'text-primary/80 font-medium' : 'text-surface-tint'}`}>
                     {plan.description}
                   </p>
                 </div>
@@ -147,11 +147,11 @@ export default function HomePricing() {
                 <div className="mb-8 flex flex-col items-start gap-1">
                   {plan.actualPrice && plan.actualPrice > plan.discountedPrice && (
                     <div className="flex items-center gap-3">
-                      <span className={`text-3xl font-display font-semibold line-through decoration-[3px] ${isHighlighted ? 'text-white/90 decoration-white/60' : 'text-primary/80 decoration-primary/40'}`}>
+                      <span className={`text-3xl font-display font-semibold line-through decoration-[3px] ${isHighlighted ? 'text-primary/70 decoration-primary/50' : 'text-primary/80 decoration-primary/40'}`}>
                         ₹{plan.actualPrice}
                       </span>
                       <span className={`text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md ${
-                        isHighlighted ? 'bg-[#a3e635] text-primary shadow-lg' : 'bg-tertiary/10 text-tertiary'
+                        isHighlighted ? 'bg-primary text-white shadow-lg' : 'bg-tertiary/10 text-tertiary'
                       }`}>
                         Save {Math.round(((plan.actualPrice - plan.discountedPrice) / plan.actualPrice) * 100)}%
                       </span>
@@ -161,7 +161,7 @@ export default function HomePricing() {
                     <span className="text-display-lg text-5xl font-display font-medium tracking-tighter">
                       ₹{plan.discountedPrice}
                     </span>
-                    <span className={`text-title-lg ${isHighlighted ? 'text-white/60' : 'opacity-60'}`}>
+                    <span className={`text-title-lg ${isHighlighted ? 'text-primary/70' : 'opacity-60'}`}>
                       {plan.title?.toLowerCase().includes('trial') ? '/ 6 month' : '/ yr'}
                     </span>
                   </div>
@@ -170,17 +170,17 @@ export default function HomePricing() {
                 <ul className="space-y-4 mb-12 flex-1">
                   {(plan.includes || []).map((feat, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <div className={`mt-0.5 rounded-full p-0.5 ${isHighlighted ? 'bg-[#a3e635]' : 'bg-tertiary'}`}>
-                        <Check size={14} className={isHighlighted ? 'text-primary' : 'text-white'} strokeWidth={3} />
+                      <div className={`mt-0.5 rounded-full p-0.5 ${isHighlighted ? 'bg-primary' : 'bg-tertiary'}`}>
+                        <Check size={14} className={isHighlighted ? 'text-white' : 'text-white'} strokeWidth={3} />
                       </div>
-                      <span className={`text-label-md font-medium ${isHighlighted ? 'text-white/90' : ''}`}>{feat}</span>
+                      <span className={`text-label-md font-medium ${isHighlighted ? 'text-primary/90' : ''}`}>{feat}</span>
                     </li>
                   ))}
                 </ul>
 
                 <div className="mb-3 text-center">
                   <span className={`inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest ${
-                    isHighlighted ? 'text-[#a3e635] drop-shadow-md' : 'text-error/90'
+                    isHighlighted ? 'text-primary drop-shadow-md' : 'text-error/90'
                   } animate-pulse`}>
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -193,7 +193,7 @@ export default function HomePricing() {
                   onClick={() => navigate('/plans')}
                   className={`w-full py-4 rounded-[1rem] text-sm font-bold transition-all ${
                     isHighlighted 
-                      ? 'bg-[#a3e635] text-primary hover:brightness-110 shadow-lg' 
+                      ? 'bg-primary text-white hover:bg-primary-container shadow-lg' 
                       : 'bg-transparent border-2 border-primary/20 text-primary hover:border-primary shadow-sm'
                   }`}
                 >

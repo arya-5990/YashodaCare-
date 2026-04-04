@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
-const IMAGES = [
+const FALLBACK_IMAGES = [
   "https://quintessencedental.com/wp-content/uploads/2025/07/Dental-Clinic-Interior-Design-jpg.webp",
   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBKEpubnWEFWfvbDUW8Ut55CwYBeEPxKfM_A&s",
   "https://bestdentaldeals.in/wp-content/uploads/2025/11/Economy-Setup-scaled-1.webp",
@@ -10,6 +13,28 @@ const IMAGES = [
 ];
 
 export default function Gallery() {
+  const [images, setImages] = useState(FALLBACK_IMAGES);
+
+  useEffect(() => {
+    const fetchClinicImages = async () => {
+      try {
+        const docRef = doc(db, "assets", "clinic");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.images && Array.isArray(data.images)) {
+            setImages(data.images);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching clinic images:", error);
+      }
+    };
+
+    fetchClinicImages();
+  }, []);
+
   return (
     <section id="gallery" className="py-24 md:py-32 bg-surface-container-low overflow-hidden">
       <div className="max-w-7xl mx-auto px-5 md:px-8">
@@ -25,7 +50,7 @@ export default function Gallery() {
         </div>
 
         <div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
-          {IMAGES.map((img, idx) => (
+          {images.map((img, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, scale: 0.98 }}

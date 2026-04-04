@@ -46,10 +46,10 @@ export default function Navbar() {
             <Link
               key={l.label}
               to={l.href}
-              className={`text-label-md font-bold transition-all hover:text-tertiary ${
+              className={`text-[15px] font-semibold transition-all hover:text-tertiary ${
                 location.pathname === l.href 
                   ? 'text-primary' 
-                  : 'text-surface-tint hover:text-primary'
+                  : 'text-primary/85 hover:text-primary'
               }`}
             >
               {l.label}

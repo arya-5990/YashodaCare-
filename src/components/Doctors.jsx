@@ -1,4 +1,4 @@
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { User, Heart, Sparkles, Activity, ShieldPlus, BadgeCheck, Stethoscope, ChevronLeft, ChevronRight, Award, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -52,8 +52,6 @@ let adShownThisSession = false;
 export default function DoctorsSection() {
   const { user } = useAuth();
   const scrollRef = useRef(null);
-  const sectionRef = useRef(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-150px" });
   const [showAd, setShowAd] = useState(false);
   const [doctors, setDoctors] = useState(FALLBACK_DOCTORS);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,14 +87,14 @@ export default function DoctorsSection() {
   }, []);
 
   useEffect(() => {
-    if (isInView && !user && !adShownThisSession) {
+    if (!user && !adShownThisSession) {
       const timer = setTimeout(() => {
         setShowAd(true);
         adShownThisSession = true;
-      }, 1200);
+      }, 25000);
       return () => clearTimeout(timer);
     }
-  }, [isInView, user]);
+  }, [user]);
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -106,7 +104,7 @@ export default function DoctorsSection() {
   };
 
   return (
-    <section id="doctors" ref={sectionRef} className="pt-12 md:pt-16 pb-24 md:pb-32 bg-surface overflow-hidden relative">
+    <section id="doctors" className="pt-12 md:pt-16 pb-24 md:pb-32 bg-surface overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-5 md:px-8">
         
         <div className="flex flex-col lg:flex-row justify-between items-end gap-8 mb-20">
@@ -224,7 +222,7 @@ export default function DoctorsSection() {
                   </div>
                   <div className="flex items-baseline gap-1 mt-2">
                     <span className="text-[4rem] leading-none font-black text-primary tracking-tighter">₹999</span>
-                    <span className="text-xl text-surface-tint font-bold">/ yr</span>
+                    <span className="text-xl text-surface-tint font-bold">/ year</span>
                   </div>
                   <p className="text-sm text-[#74B72E] font-bold mt-4 flex items-center justify-center gap-1.5 flex-wrap">
                     <Sparkles size={14} /> Limited time introductory offer!

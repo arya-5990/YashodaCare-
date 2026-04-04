@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Check, Sparkles, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { collection, getDocs } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
@@ -9,9 +9,11 @@ import { db } from '../firebase';
 export default function PlanSection() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(null);
+  const [autoCheckoutDone, setAutoCheckoutDone] = useState(false);
 
   // Load Razorpay SDK dynamically
   const loadRazorpayScript = () =>
@@ -112,7 +114,14 @@ export default function PlanSection() {
         const querySnapshot = await getDocs(collection(db, 'plans'));
         if (!querySnapshot.empty) {
           const plansData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setPlans(plansData);
+          console.log('Plans from Firestore:', plansData.map(p => ({ title: p.title, isBestseller: p.isBestseller })));
+          // Sort: bestseller in the middle, rest sorted by price
+          const bestsellers = plansData.filter(p => p.isBestseller === true);
+          const others = plansData.filter(p => p.isBestseller !== true).sort((a, b) => (a.discountedPrice || 0) - (b.discountedPrice || 0));
+          const sorted = others.length >= 2
+            ? [others[0], ...bestsellers, ...others.slice(1)]
+            : [...others, ...bestsellers];
+          setPlans(sorted);
         } else {
           setPlans([{
             id: 'default-plan',
@@ -157,6 +166,24 @@ export default function PlanSection() {
     fetchPlans();
   }, []);
 
+  // Auto-trigger checkout when navigated from home with a selected plan
+  useEffect(() => {
+    if (loading || autoCheckoutDone || !user) return;
+
+    const state = location.state;
+    if (!state?.startCheckout || !state.planId) return;
+
+    const selectedPlan = plans.find(p => p.id === state.planId);
+    if (!selectedPlan) return;
+
+    setAutoCheckoutDone(true);
+
+    // Clear navigation state so back/refresh doesn't retrigger
+    navigate(location.pathname, { replace: true });
+
+    handleSubscribe(selectedPlan);
+  }, [loading, autoCheckoutDone, user, location, plans, navigate]);
+
   if (loading) {
     return (
       <section id="plan" className="py-20 md:py-32 bg-surface flex justify-center items-center min-h-[500px]">
@@ -166,131 +193,120 @@ export default function PlanSection() {
   }
 
   return (
-    <section id="plan" className="py-24 md:py-32 bg-surface relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-5 md:px-8 relative z-10 space-y-16">
-        {plans.map((plan, index) => (
-          <motion.div
-            key={plan.id}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.45, delay: index * 0.1 }}
-            className="flex flex-col lg:flex-row gap-4"
-          >
-            {/* Left Box — Plan Name & Price */}
-            <div className="flex-1 bg-surface-container-lowest rounded-[var(--radius-xl)] p-10 md:p-14 shadow-ambient relative outline-ghost">
-              <div className="flex justify-between items-start mb-16">
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full mb-3 inline-block bg-surface-container text-surface-tint outline-ghost">
+    <section id="plan" className="py-12 md:py-16 bg-surface relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-5 md:px-8 relative z-10">
+
+        {/* Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+          {plans.map((plan, idx) => {
+            const isHighlighted = plan.isBestseller === true;
+
+            return (
+              <motion.div
+                key={plan.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className={`relative flex flex-col p-10 rounded-[2.5rem] h-full transition-transform hover:scale-[1.02] ${
+                  isHighlighted
+                    ? 'premium-metal-bg text-primary shadow-2xl z-10 border-none'
+                    : 'bg-surface-container-lowest text-primary outline-ghost shadow-ambient'
+                }`}
+              >
+                {/* Best Seller Badge */}
+                {isHighlighted && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-full shadow-lg">
+                    Best Seller
+                  </div>
+                )}
+
+                {/* Plan Type Tag */}
+                <div className="mb-4">
+                  <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full mb-6 inline-block ${
+                    isHighlighted ? 'bg-white/30 text-primary border border-primary/20' : 'bg-surface-container text-surface-tint outline-ghost'
+                  }`}>
                     {plan.planType?.toLowerCase() === 'family' ? 'Multi-User' : 'Essential'}
                   </span>
-                  <h3 className="text-display-md text-primary mb-2 text-3xl md:text-5xl font-display font-medium">
+                  <h3 className="text-display-lg text-4xl mb-3 font-display font-medium tracking-tight">
                     {plan.title}
                   </h3>
-                  <p className="text-body-md text-surface-tint max-w-sm">
+                  <p className={`text-body-md ${isHighlighted ? 'text-primary/80 font-medium' : 'text-surface-tint'}`}>
                     {plan.description}
                   </p>
                 </div>
-                {plan.isPopular && (
-                  <div className="trust-shield">
-                    <Sparkles size={16} className="text-tertiary" />
-                    <span className="text-label-md text-primary font-bold">Recommended</span>
-                  </div>
-                )}
-              </div>
 
-              <div className="mt-auto">
-                {plan.actualPrice && (
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl md:text-3xl font-black text-slate-400 line-through decoration-[--color-accent-joy] decoration-[3px]">
-                      ₹{plan.actualPrice}
-                    </span>
-                    <span className="text-sm font-black text-[#0A1929] bg-[#74B72E] px-3 py-1 rounded-full shadow-ambient drop-shadow-sm">
-                      SAVE ₹{plan.actualPrice - plan.discountedPrice}!
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-baseline gap-2">
-                  <span className="text-6xl md:text-7xl font-black text-primary tracking-tighter">
-                    ₹{plan.discountedPrice}
-                  </span>
-                  <span className="text-xl text-surface-tint font-bold">
-                    {plan.title?.toLowerCase().includes('trial') ? '/ 6 months' : '/ year'}
-                  </span>
-                </div>
-                <p className="text-sm text-[#74B72E] font-bold mt-3 flex items-center gap-1.5">
-                  <Sparkles size={16} /> Limited time intro pricing
-                </p>
-              </div>
-
-              <div className="mt-12 pt-8">
-                <button
-                  onClick={() => handleSubscribe(plan)}
-                  disabled={checkoutLoading === plan.id}
-                  className="btn-primary w-full disabled:opacity-80 disabled:cursor-not-allowed"
-                >
-                  {checkoutLoading === plan.id ? (
-                    <><Loader2 size={18} className="animate-spin text-on-primary" /> Securing Transaction...</>
-                  ) : (
-                    'Secure My Membership'
+                {/* Pricing */}
+                <div className="mb-8 flex flex-col items-start gap-1">
+                  {plan.actualPrice && plan.actualPrice > plan.discountedPrice && (
+                    <div className="flex items-center gap-3">
+                      <span className={`text-3xl font-display font-semibold line-through decoration-[3px] ${isHighlighted ? 'text-primary/70 decoration-primary/50' : 'text-primary/80 decoration-primary/40'}`}>
+                        ₹{plan.actualPrice}
+                      </span>
+                      <span className={`text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md ${
+                        isHighlighted ? 'bg-primary text-white shadow-lg' : 'bg-tertiary/10 text-tertiary'
+                      }`}>
+                        Save {Math.round(((plan.actualPrice - plan.discountedPrice) / plan.actualPrice) * 100)}%
+                      </span>
+                    </div>
                   )}
-                </button>
-              </div>
-            </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-display-lg text-5xl font-display font-medium tracking-tighter">
+                      ₹{plan.discountedPrice}
+                    </span>
+                    <span className={`text-title-lg ${isHighlighted ? 'text-primary/70' : 'opacity-60'}`}>
+                      {plan.title?.toLowerCase().includes('trial') ? '/ 6 months' : '/ year'}
+                    </span>
+                  </div>
+                </div>
 
-            {/* Right Box — Features & Clarification */}
-            <div className="flex-1 bg-surface-container-low rounded-[var(--radius-xl)] p-10 md:p-14 outline-ghost flex flex-col justify-between">
-              <div>
-                <p className="text-label-md uppercase tracking-[0.1em] text-primary/60 mb-8 font-semibold">
-                  Clinical Benefits
-                </p>
-
-                <ul className="space-y-6">
+                {/* Features */}
+                <ul className="space-y-4 mb-12 flex-1">
                   {(plan.includes || []).map((feat, i) => (
-                    <motion.li
-                      key={i}
-                      initial={{ opacity: 0, x: 12 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: i * 0.06 }}
-                      className="flex items-start gap-4"
-                    >
-                      <div className="mt-1 w-6 h-6 rounded-full bg-tertiary-fixed flex items-center justify-center shrink-0">
-                        <Check size={14} className="text-tertiary-container" strokeWidth={3} />
+                    <li key={i} className="flex items-start gap-3">
+                      <div className={`mt-0.5 rounded-full p-0.5 ${isHighlighted ? 'bg-primary' : 'bg-tertiary'}`}>
+                        <Check size={14} className="text-white" strokeWidth={3} />
                       </div>
-                      <span className="text-body-md text-on-surface font-medium pt-0.5">{feat}</span>
-                    </motion.li>
+                      <span className={`text-label-md font-medium ${isHighlighted ? 'text-primary/90' : ''}`}>{feat}</span>
+                    </li>
                   ))}
                 </ul>
 
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.4 }}
-                  className="mt-10 p-5 rounded-xl bg-gradient-to-br from-[#EEF9F1] to-[#E2F5E9] border border-[#74B72E]/30 relative overflow-hidden shadow-sm"
-                >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#74B72E]/10 rounded-full blur-2xl -translate-y-10 translate-x-10"></div>
-                  <h4 className="text-[#0A1929] font-bold mb-1.5 flex items-center gap-2">
-                    <Sparkles size={16} className="text-[#74B72E]" />
-                    Zero Risk Guarantee
-                  </h4>
-                  <p className="text-surface-tint text-sm font-medium leading-relaxed">
-                    If you don't use your plan this year, your benefits automatically <span className="text-primary font-bold">carry forward</span> to the next year—along with a <span className="text-primary font-bold">complimentary 6-month extension!</span>
-                  </p>
-                </motion.div>
-              </div>
-
-              {plan.note && (
-                <div className="mt-12 px-6 py-4 bg-surface rounded-[var(--radius-md)] outline-ghost">
-                  <p className="text-label-md text-surface-tint italic">
-                    {plan.note}
-                  </p>
+                {/* Offer expiry notice */}
+                <div className="mb-3 text-center">
+                  <span className={`inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest ${
+                    isHighlighted ? 'text-primary drop-shadow-md' : 'text-error/90'
+                  } animate-pulse`}>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Offer Expiring Soon
+                  </span>
                 </div>
-              )}
-            </div>
-          </motion.div>
-        ))}
+
+                {/* CTA */}
+                <button
+                  onClick={() => handleSubscribe(plan)}
+                  disabled={checkoutLoading === plan.id}
+                  className={`w-full py-4 rounded-[1rem] text-sm font-bold transition-all disabled:opacity-80 disabled:cursor-not-allowed ${
+                    isHighlighted
+                      ? 'bg-primary text-white hover:bg-primary-container shadow-lg'
+                      : 'bg-transparent border-2 border-primary/20 text-primary hover:border-primary shadow-sm'
+                  }`}
+                >
+                  {checkoutLoading === plan.id ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 size={16} className="animate-spin" /> Securing...
+                    </span>
+                  ) : (
+                    isHighlighted ? `Choose ${plan.title}` : `Select ${plan.title}`
+                  )}
+                </button>
+              </motion.div>
+            );
+          })}
+        </div>
+
       </div>
     </section>
   );

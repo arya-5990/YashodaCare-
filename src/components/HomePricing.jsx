@@ -12,6 +12,95 @@ export default function HomePricing() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isYearly, setIsYearly] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState(null);
+
+  // Load Razorpay SDK dynamically (shared logic with Plans page)
+  const loadRazorpayScript = () =>
+    new Promise((resolve) => {
+      if (document.getElementById('razorpay-sdk')) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.id = 'razorpay-sdk';
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
+  const handleSubscribe = async (plan) => {
+    if (!user) {
+      navigate('/auth', { state: { message: 'Please log in to register your plan' } });
+      return;
+    }
+
+    setCheckoutLoading(plan.id);
+
+    try {
+      const loaded = await loadRazorpayScript();
+      if (!loaded) throw new Error('Failed to load payment SDK. Please check your connection.');
+
+      const orderRes = await fetch('https://us-central1-ydcplans.cloudfunctions.net/createRazorpayOrder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.user_id, planId: plan.id }),
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) throw new Error(orderData?.error || 'Could not create payment order');
+
+      await new Promise((resolve, reject) => {
+        const rzp = new window.Razorpay({
+          key: orderData.keyId,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: 'SmileSathi',
+          description: plan.title || 'Membership Plan',
+          order_id: orderData.orderId,
+          prefill: {
+            name: user.displayName || '',
+            email: user.email || '',
+          },
+          theme: { color: '#74B72E' },
+          handler: async (response) => {
+            try {
+              const verifyRes = await fetch('https://us-central1-ydcplans.cloudfunctions.net/verifyRazorpayPayment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  userId: user.user_id,
+                  planId: plan.id,
+                }),
+              });
+
+              const verifyData = await verifyRes.json();
+              if (!verifyRes.ok) throw new Error(verifyData?.error || 'Payment verification failed');
+
+              resolve();
+              navigate('/profile', { state: { paymentSuccess: true } });
+            } catch (err) {
+              reject(err);
+            }
+          },
+          modal: {
+            ondismiss: () => reject(new Error('Payment cancelled')),
+          },
+        });
+        rzp.open();
+      });
+    } catch (err) {
+      if (err.message !== 'Payment cancelled') {
+        console.error('Payment Error:', err);
+        alert(err.message || 'Payment failed. Please try again.');
+      }
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -82,7 +171,7 @@ export default function HomePricing() {
         <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16">
           <div className="max-w-2xl">
             <h2 className="text-display-lg text-primary mb-6">
-              Structured for Certainty.
+              Featured Plans
             </h2>
             <p className="text-body-md text-surface-tint">
               Compare our tiered plans designed to balance premium clinical access with financial predictability.
@@ -109,7 +198,7 @@ export default function HomePricing() {
         {/* Pricing Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-16 items-stretch">
           {plans.map((plan, idx) => {
-            const isHighlighted = idx === 1;
+            const isHighlighted = plan.isBestseller === true;
 
             return (
               <motion.div
@@ -126,7 +215,7 @@ export default function HomePricing() {
               >
                 {isHighlighted && (
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-full shadow-lg">
-                    Premium Member Choice
+                    Best Seller
                   </div>
                 )}
 
@@ -162,7 +251,7 @@ export default function HomePricing() {
                       ₹{plan.discountedPrice}
                     </span>
                     <span className={`text-title-lg ${isHighlighted ? 'text-primary/70' : 'opacity-60'}`}>
-                      {plan.title?.toLowerCase().includes('trial') ? '/ 6 month' : '/ yr'}
+                      {plan.title?.toLowerCase().includes('trial') ? '/ 6 month' : '/ year'}
                     </span>
                   </div>
                 </div>
@@ -190,14 +279,21 @@ export default function HomePricing() {
                 </div>
 
                 <button
-                  onClick={() => navigate('/plans')}
-                  className={`w-full py-4 rounded-[1rem] text-sm font-bold transition-all ${
+                  onClick={() => handleSubscribe(plan)}
+                  disabled={checkoutLoading === plan.id}
+                  className={`w-full py-4 rounded-[1rem] text-sm font-bold transition-all disabled:opacity-80 disabled:cursor-not-allowed ${
                     isHighlighted 
                       ? 'bg-primary text-white hover:bg-primary-container shadow-lg' 
                       : 'bg-transparent border-2 border-primary/20 text-primary hover:border-primary shadow-sm'
                   }`}
                 >
-                  {isHighlighted ? `Choose ${plan.title}` : `Select ${plan.title}`}
+                  {checkoutLoading === plan.id ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 size={16} className="animate-spin" /> Securing...
+                    </span>
+                  ) : (
+                    isHighlighted ? `Choose ${plan.title}` : `Select ${plan.title}`
+                  )}
                 </button>
               </motion.div>
             );

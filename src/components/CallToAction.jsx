@@ -30,12 +30,12 @@ export default function CallToAction() {
             >
               Start Your Plan
             </Link>
-            <Link
-              to="/auth"
-              className="px-10 py-5 border border-white/20 text-on-primary rounded-2xl text-label-md font-black uppercase tracking-widest hover:bg-white/5 transition-all w-full sm:w-auto"
+            <a
+              href="tel:918109424356"
+              className="px-10 py-5 border border-white/20 text-on-primary rounded-2xl text-label-md font-black uppercase tracking-widest hover:bg-white/5 transition-all w-full sm:w-auto flex items-center justify-center"
             >
               Talk to an Expert
-            </Link>
+            </a>
           </div>
         </motion.div>
       </div>

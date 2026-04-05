@@ -36,75 +36,134 @@ export default function Terms() {
           <div className="space-y-16 text-body-md text-surface-tint leading-relaxed max-w-none">
             <div className="space-y-6">
               <p className="text-title-lg text-primary font-normal leading-relaxed">
-                Welcome to SmileSathi ("SmileSathi"). These Terms of Engagement govern your interaction with our digital platform and physical clinical sites.
+                Terms &amp; Conditions – SmileSathi Indore
               </p>
               <p>
-                By accessing our clinical systems or activating a membership, you provide explicit consent to be bound by these architectural reliability standards.
+                These Terms &amp; Conditions govern the SmileSathi dental membership plans and related services offered at SmileSathi Indore. By purchasing or using SmileSathi services, you agree to be bound by these terms.
               </p>
             </div>
 
             <section className="space-y-8">
               <div className="flex items-center gap-4">
                 <span className="text-label-md text-primary/30 font-bold tracking-widest">01</span>
-                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">The ₹999 Clinical Protocol</h3>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Membership Plans</h3>
               </div>
-              <div className="bg-surface-container-low p-8 rounded-[var(--radius-md)] outline-ghost space-y-6">
-                <ul className="space-y-6">
-                  <li className="flex gap-6">
-                    <span className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
-                    <div>
-                      <strong className="text-on-surface font-bold">Temporal Validity:</strong>
-                      <p className="mt-1 opacity-80">Exactly 365 days from the activation epoch. No grace periods are recognized.</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-6">
-                    <span className="w-2 h-2 rounded-full bg-tertiary mt-2 shrink-0" />
-                    <div>
-                      <strong className="text-on-surface font-bold">Identity Integrity:</strong>
-                      <p className="mt-1 opacity-80">Memberships are cryptographically bound to a single verified individual. Transfer functions are disabled.</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-6">
-                    <span className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
-                    <div>
-                      <strong className="text-on-surface font-bold">Coverage Logic:</strong>
-                      <p className="mt-1 opacity-80">Specific preventive protocols as defined in the membership registry. Major surgical interventions require separate authorization.</p>
-                    </div>
-                  </li>
-                </ul>
-              </div>
+              <p>
+                SmileSathi offers dental membership plans, including but not limited to plans priced at ₹999 and other premium options. Benefits and inclusions may vary depending on the selected plan, as communicated at the time of purchase.
+              </p>
             </section>
 
             <section className="space-y-8">
               <div className="flex items-center gap-4">
                 <span className="text-label-md text-primary/30 font-bold tracking-widest">02</span>
-                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Financial Integrity</h3>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Non-Refundable Clause</h3>
               </div>
               <p className="text-title-lg text-primary italic">
-                "All membership activations are final. Zero-refund policy applies."
+                All membership plans are strictly non-refundable.
               </p>
               <p>
-                Once a membership is authorized via our clinical gateway, the transaction is non-reversible. We do not provide partial reversals for unutilized temporal segments.
+                Once a membership is purchased, no cancellation, refund, or transfer is permitted under any circumstances, including partial usage or non-usage of benefits.
               </p>
             </section>
 
             <section className="space-y-8">
               <div className="flex items-center gap-4">
                 <span className="text-label-md text-primary/30 font-bold tracking-widest">03</span>
-                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Clinical Authority</h3>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Validity &amp; Usage</h3>
               </div>
-              <p>
-                SmileSathi reserves absolute authority to refuse specific procedures if our clinical staff determines them to be medically unviable or structurally unsafe for the patient's current health state.
-              </p>
+              <ul className="space-y-4 list-disc list-inside">
+                <li>Membership is valid only for the specified duration mentioned at the time of purchase.</li>
+                <li>Benefits can be availed solely during the active validity period of the membership.</li>
+              </ul>
             </section>
 
             <section className="space-y-8">
               <div className="flex items-center gap-4">
                 <span className="text-label-md text-primary/30 font-bold tracking-widest">04</span>
-                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Jurisdictional Framework</h3>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Applicable Clinics</h3>
+              </div>
+              <ul className="space-y-4 list-disc list-inside">
+                <li>SmileSathi services and benefits are applicable only at selected and authorized partner clinics.</li>
+                <li>The company reserves the right to modify, update, or change the list of partner clinics at its sole discretion at any time.</li>
+              </ul>
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center gap-4">
+                <span className="text-label-md text-primary/30 font-bold tracking-widest">05</span>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Membership Card Delivery</h3>
+              </div>
+              <ul className="space-y-4 list-disc list-inside">
+                <li>A physical membership card will typically be delivered within 7–10 working days from the date of purchase.</li>
+                <li>Until physical delivery, digital confirmation or receipt may be used as valid proof of membership.</li>
+              </ul>
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center gap-4">
+                <span className="text-label-md text-primary/30 font-bold tracking-widest">06</span>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Treatment Terms</h3>
+              </div>
+              <ul className="space-y-4 list-disc list-inside">
+                <li>All treatments are subject to clinical examination and diagnosis by the treating dentist.</li>
+                <li>Certain procedures may involve additional charges beyond what is covered under the membership benefits.</li>
+                <li>The final decision regarding treatment suitability and protocol lies solely with the treating dentist.</li>
+              </ul>
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center gap-4">
+                <span className="text-label-md text-primary/30 font-bold tracking-widest">07</span>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Appointment Policy</h3>
+              </div>
+              <ul className="space-y-4 list-disc list-inside">
+                <li>Prior appointment is mandatory or strongly recommended before visiting partner clinics.</li>
+                <li>All services are subject to the availability of doctors, chairs, and clinic schedules.</li>
+              </ul>
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center gap-4">
+                <span className="text-label-md text-primary/30 font-bold tracking-widest">08</span>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Misuse &amp; Termination</h3>
               </div>
               <p>
-                These terms are governed by the laws of the Republic of India. Any systemic disputes shall be resolved within the exclusive jurisdiction of the judicial systems in Indore, Madhya Pradesh.
+                Any misuse, fraud, misrepresentation, or unauthorized sharing of membership benefits will lead to immediate termination of membership without any refund, compensation, or reinstatement.
+              </p>
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center gap-4">
+                <span className="text-label-md text-primary/30 font-bold tracking-widest">09</span>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Limitation of Liability</h3>
+              </div>
+              <p>
+                SmileSathi primarily acts as a facilitator connecting patients with partner clinics. The company shall not be held liable for:
+              </p>
+              <ul className="space-y-4 list-disc list-inside">
+                <li>Medical outcomes or results of treatment.</li>
+                <li>Treatment complications or side effects.</li>
+                <li>Any negligence, errors, or omissions by partner clinics or treating professionals.</li>
+              </ul>
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center gap-4">
+                <span className="text-label-md text-primary/30 font-bold tracking-widest">10</span>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Modification of Terms</h3>
+              </div>
+              <p>
+                The company reserves the right to modify, amend, or update these Terms &amp; Conditions at any time without prior notice. The latest version will be deemed applicable to all existing and new memberships.
+              </p>
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center gap-4">
+                <span className="text-label-md text-primary/30 font-bold tracking-widest">11</span>
+                <h3 className="text-headline-md text-primary font-bold uppercase tracking-widest">Governing Law &amp; Jurisdiction</h3>
+              </div>
+              <p>
+                These Terms &amp; Conditions shall be governed by and construed in accordance with the laws of India. All disputes shall be subject to the exclusive jurisdiction of the courts at Indore, Madhya Pradesh, including the Hon’ble Madhya Pradesh High Court as applicable.
               </p>
             </section>
 
@@ -122,8 +181,8 @@ export default function Terms() {
                     <div>
                       <p className="text-label-md text-on-primary/40 uppercase tracking-widest font-bold">Registered Site</p>
                       <p className="text-title-lg text-on-primary leading-relaxed">
-                        Plot No. 17, First Floor, Above New Globas Medical,<br />
-                        Gori Nagar, Sukhliya, Indore, MP – 452010
+                        Dr. Ankit Chaurasiya<br />
+                        123, KingsPark Colony, GPO, Indore – 452001
                       </p>
                     </div>
                   </div>
@@ -135,7 +194,7 @@ export default function Terms() {
                       </div>
                       <div>
                         <p className="text-label-md text-on-primary/40 uppercase tracking-widest font-bold">Email</p>
-                        <a href="mailto:doctordeskofficial@gmail.com" className="text-title-lg text-on-primary hover:underline">doctordeskofficial@gmail.com</a>
+                        <a href="mailto:smilesathiofficial@gmail.com" className="text-title-lg text-on-primary hover:underline">smilesathiofficial@gmail.com</a>
                       </div>
                     </div>
                     <div className="flex items-center gap-6">

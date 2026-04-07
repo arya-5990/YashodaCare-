@@ -15,16 +15,18 @@ export default function PlanSection() {
   const [checkoutLoading, setCheckoutLoading] = useState(null);
   const [autoCheckoutDone, setAutoCheckoutDone] = useState(false);
 
-  // Load Razorpay SDK dynamically
-  const loadRazorpayScript = () =>
+  // Load Cashfree Payment SDK dynamically
+  const loadCashfreeSDK = (env = 'sandbox') =>
     new Promise((resolve) => {
-      if (document.getElementById('razorpay-sdk')) {
+      if (window.Cashfree) {
         resolve(true);
         return;
       }
+
       const script = document.createElement('script');
-      script.id = 'razorpay-sdk';
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.src = env === 'production'
+        ? 'https://sdk.cashfree.com/js/ui/2.0.0/cashfree.prod.js'
+        : 'https://sdk.cashfree.com/js/ui/2.0.0/cashfree.sandbox.js';
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
@@ -39,12 +41,8 @@ export default function PlanSection() {
     setCheckoutLoading(plan.id);
 
     try {
-      // 1. Load Razorpay SDK
-      const loaded = await loadRazorpayScript();
-      if (!loaded) throw new Error('Failed to load payment SDK. Please check your connection.');
-
-      // 2. Create order on backend
-      const orderRes = await fetch('https://us-central1-ydcplans.cloudfunctions.net/createRazorpayOrder', {
+      // 1. Create Cashfree order on backend
+      const orderRes = await fetch('https://us-central1-ydcplans.cloudfunctions.net/createCashfreeOrder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.user_id, planId: plan.id }),
@@ -53,50 +51,13 @@ export default function PlanSection() {
       const orderData = await orderRes.json();
       if (!orderRes.ok) throw new Error(orderData?.error || 'Could not create payment order');
 
-      // 3. Open Razorpay modal
-      await new Promise((resolve, reject) => {
-        const rzp = new window.Razorpay({
-          key: orderData.keyId,
-          amount: orderData.amount,
-          currency: orderData.currency,
-          name: 'SmileSathi',
-          description: plan.title || 'Membership Plan',
-          order_id: orderData.orderId,
-          prefill: {
-            name: user.displayName || '',
-            email: user.email || '',
-          },
-          theme: { color: '#74B72E' },
-          handler: async (response) => {
-            try {
-              // 4. Verify payment signature on backend
-              const verifyRes = await fetch('https://us-central1-ydcplans.cloudfunctions.net/verifyRazorpayPayment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  userId: user.user_id,
-                  planId: plan.id,
-                }),
-              });
+      // 2. Load Cashfree SDK (sandbox or production based on backend env)
+      const loaded = await loadCashfreeSDK(orderData.env);
+      if (!loaded) throw new Error('Failed to load payment SDK. Please check your connection.');
 
-              const verifyData = await verifyRes.json();
-              if (!verifyRes.ok) throw new Error(verifyData?.error || 'Payment verification failed');
-
-              resolve();
-              navigate('/profile', { state: { paymentSuccess: true } });
-            } catch (err) {
-              reject(err);
-            }
-          },
-          modal: {
-            ondismiss: () => reject(new Error('Payment cancelled')),
-          },
-        });
-        rzp.open();
-      });
+      // 3. Redirect to Cashfree hosted checkout using the paymentSessionId
+      const cashfree = new window.Cashfree(orderData.paymentSessionId);
+      cashfree.redirect();
 
     } catch (err) {
       if (err.message !== 'Payment cancelled') {

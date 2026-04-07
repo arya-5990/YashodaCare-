@@ -4,10 +4,14 @@ const cors = require("cors")({ origin: true });
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const axios = require("axios");
 
 admin.initializeApp();
 
 // ---------- RAZORPAY CONFIGURATION ----------
+// NOTE: Razorpay is now deprecated in favour of Cashfree, but
+// these keys are kept for backward compatibility until you
+// fully switch and remove Razorpay from the project.
 const RAZORPAY_KEY_ID = "rzp_test_SYaxvldiyvumrW";
 const RAZORPAY_KEY_SECRET = "FAGSIZ6nlcQbr55Td6Cdvdab";
 
@@ -15,6 +19,25 @@ const razorpay = new Razorpay({
 	key_id: RAZORPAY_KEY_ID,
 	key_secret: RAZORPAY_KEY_SECRET,
 });
+// --------------------------------------------
+
+// ---------- CASHFREE CONFIGURATION ----------
+// For now we use your TEST keys directly so you
+// can deploy without extra config. When you move
+// to production, switch to environment variables.
+
+const CASHFREE_APP_ID = "TEST11037912ca2f79f9e9289597351221973011";
+const CASHFREE_SECRET_KEY = "cfsk_ma_test_df9ef8b28cf9c2757632020df3f7d705_bbad4d14";
+
+// Optional overrides via environment variables
+const CASHFREE_WEBHOOK_SECRET = process.env.CASHFREE_WEBHOOK_SECRET || "";
+const CASHFREE_ENV = process.env.CASHFREE_ENV || "sandbox";
+
+const CASHFREE_API_VERSION = "2022-09-01";
+const CASHFREE_BASE_URL =
+	CASHFREE_ENV === "production"
+		? "https://api.cashfree.com/pg"
+		: "https://sandbox.cashfree.com/pg";
 // --------------------------------------------
 
 // -----------------------------------------------------------------
@@ -88,6 +111,137 @@ exports.createRazorpayOrder = functions.https.onRequest(async (req, res) => {
 		} catch (err) {
 			console.error("createRazorpayOrder error:", err);
 			res.status(500).json({ error: err.message || "Failed to create order" });
+		}
+	});
+});
+
+// -----------------------------------------------------------------
+// 1b. Create Cashfree Order  (new flow replacing Razorpay)
+// -----------------------------------------------------------------
+exports.createCashfreeOrder = functions.https.onRequest(async (req, res) => {
+	cors(req, res, async () => {
+		if (req.method !== "POST") {
+			res.status(405).send("Method Not Allowed");
+			return;
+		}
+
+		if (!CASHFREE_APP_ID || !CASHFREE_SECRET_KEY) {
+			console.error("Cashfree credentials are not configured");
+			res
+				.status(500)
+				.json({ error: "Cashfree credentials not configured on server" });
+			return;
+		}
+
+		try {
+			const userId = String(req.body?.userId ?? "");
+			const planId = String(req.body?.planId ?? "");
+
+			if (!userId || !planId) {
+				res.status(400).json({ error: "Missing userId or planId" });
+				return;
+			}
+
+			// Fetch plan price securely from Firestore
+			const planSnap = await admin
+				.firestore()
+				.collection("plans")
+				.doc(planId)
+				.get();
+
+			if (!planSnap.exists) {
+				res.status(404).json({ error: "Plan not found" });
+				return;
+			}
+
+			const planData = planSnap.data();
+			const amount = Number(planData.discountedPrice || 0);
+			if (!amount || amount <= 0) {
+				res.status(400).json({ error: "Invalid plan amount" });
+				return;
+			}
+
+			// Fetch user details for Cashfree customer info
+			const userSnap = await admin
+				.firestore()
+				.collection("users")
+				.doc(userId)
+				.get();
+
+			const userData = userSnap.exists ? userSnap.data() : {};
+			const customerEmail = userData.email || "no-email@yashodacare.in";
+			const customerPhone = userData.phone || "9999999999";
+			const customerName =
+				userData.name || userData.fullName || userData.displayName || "Member";
+
+			// Use our own orderId as Cashfree order_id so we can
+			// directly map webhooks back to Firestore.
+			const orderId = `CF_${Date.now()}_${userId.slice(0, 8)}`;
+
+			// Log pending transaction in Firestore
+			await admin.firestore().collection("transactions").doc(orderId).set({
+				userId: userId,
+				planId: planId,
+				amount: amount,
+				status: "PENDING",
+				provider: "cashfree",
+				createdAt: admin.firestore.FieldValue.serverTimestamp(),
+			});
+
+			// Construct Cashfree order payload
+			const payload = {
+				order_id: orderId,
+				order_amount: amount,
+				order_currency: "INR",
+				customer_details: {
+					customer_id: userId,
+					customer_email: customerEmail,
+					customer_phone: customerPhone,
+					customer_name: customerName,
+				},
+				order_meta: {
+					// User is redirected here after payment completion
+					return_url:
+						"https://www.smilesathi.in/profile?cf_order_id={order_id}",
+					// Cashfree will send server-to-server notification to this URL
+					notify_url: `https://us-central1-${process.env.GCLOUD_PROJECT}.cloudfunctions.net/cashfreeWebhook`,
+				},
+				notes: {
+					planId,
+					planTitle: planData.title || "Membership Plan",
+				},
+			};
+
+			const cfRes = await axios.post(`${CASHFREE_BASE_URL}/orders`, payload, {
+				headers: {
+					"x-client-id": CASHFREE_APP_ID,
+					"x-client-secret": CASHFREE_SECRET_KEY,
+					"x-api-version": CASHFREE_API_VERSION,
+					"Content-Type": "application/json",
+				},
+			});
+
+			const cfData = cfRes.data || {};
+			const paymentSessionId = cfData.payment_session_id;
+
+			if (!paymentSessionId) {
+				console.error("Cashfree response missing payment_session_id", cfData);
+				res.status(500).json({ error: "Failed to initialise payment session" });
+				return;
+			}
+
+			res.status(200).json({
+				orderId,
+				paymentSessionId,
+				env: CASHFREE_ENV,
+			});
+		} catch (err) {
+			console.error("createCashfreeOrder error:", err.response?.data || err);
+			res.status(500).json({
+				error:
+					err.response?.data?.message ||
+					"Failed to create Cashfree order. Please try again.",
+			});
 		}
 	});
 });
@@ -178,6 +332,135 @@ exports.verifyRazorpayPayment = functions.https.onRequest(async (req, res) => {
 		} catch (err) {
 			console.error("verifyRazorpayPayment error:", err);
 			res.status(500).json({ error: err.message || "Verification failed" });
+		}
+	});
+});
+
+// -----------------------------------------------------------------
+// 2b. Cashfree Webhook (server-to-server confirmation)
+// -----------------------------------------------------------------
+exports.cashfreeWebhook = functions.https.onRequest(async (req, res) => {
+	cors(req, res, async () => {
+		try {
+			// Verify webhook signature if a secret is configured
+			if (CASHFREE_WEBHOOK_SECRET) {
+				const signature = req.headers["x-webhook-signature"];
+				if (!signature) {
+					console.error("Missing Cashfree webhook signature header");
+					res.status(400).send("Missing signature");
+					return;
+				}
+
+				const expected = crypto
+					.createHmac("sha256", CASHFREE_WEBHOOK_SECRET)
+					.update(JSON.stringify(req.body))
+					.digest("base64");
+
+				if (expected !== signature) {
+					console.error("Invalid Cashfree webhook signature");
+					res.status(400).send("Invalid signature");
+					return;
+				}
+			} else {
+				console.warn("CASHFREE_WEBHOOK_SECRET not configured – skipping signature verification");
+			}
+
+			const event = req.body?.event;
+			const order = req.body?.data?.order || {};
+			const payment = req.body?.data?.payment || {};
+
+			const orderId = order.order_id;
+			const orderStatus = (order.order_status || "").toUpperCase();
+			const paymentId = payment.payment_id;
+
+			if (!orderId) {
+				res.status(400).send("Missing order_id");
+				return;
+			}
+
+			const isSuccess =
+				orderStatus === "PAID" ||
+				orderStatus === "SUCCESS" ||
+				orderStatus === "COMPLETED" ||
+				event === "payment.captured";
+
+			const txnRef = admin.firestore().collection("transactions").doc(orderId);
+			const txnSnap = await txnRef.get();
+
+			if (!txnSnap.exists) {
+				console.warn("Transaction not found for Cashfree order", orderId);
+				res.status(200).send("OK");
+				return;
+			}
+
+			const txnData = txnSnap.data() || {};
+
+			// If already processed, do nothing
+			if (txnData.status === "SUCCESS" || txnData.status === "FAILED") {
+				res.status(200).send("OK");
+				return;
+			}
+
+			const newStatus = isSuccess ? "SUCCESS" : "FAILED";
+
+			await txnRef.set(
+				{
+					status: newStatus,
+					provider: "cashfree",
+					paymentId: paymentId || txnData.paymentId,
+					paidAt: isSuccess
+						? admin.firestore.FieldValue.serverTimestamp()
+						: txnData.paidAt,
+				},
+				{ merge: true },
+			);
+
+			if (isSuccess) {
+				const resolvedUserId = String(txnData.userId || "");
+				const resolvedPlanId = String(txnData.planId || "");
+
+				if (resolvedUserId && resolvedPlanId) {
+					const planSnap = await admin
+						.firestore()
+						.collection("plans")
+						.doc(resolvedPlanId)
+						.get();
+
+					const planTitle = planSnap.exists
+						? planSnap.data().title
+						: "Premium Plan";
+
+					await admin
+						.firestore()
+						.collection("users")
+						.doc(resolvedUserId)
+						.update({
+							plan_id: resolvedPlanId,
+							plan_title: planTitle,
+							plan_purchased_at: new Date().toISOString(),
+						});
+
+					// Mirror into purchases collection
+					await admin
+						.firestore()
+						.collection("purchases")
+						.doc(orderId)
+						.set(
+							{
+								...txnData,
+								status: "SUCCESS",
+								paymentId: paymentId || txnData.paymentId,
+								provider: "cashfree",
+							},
+							{ merge: true },
+						);
+				}
+			}
+
+			res.status(200).send("OK");
+		} catch (err) {
+			console.error("cashfreeWebhook error:", err);
+			res.status(500).send("Internal Server Error");
 		}
 	});
 });

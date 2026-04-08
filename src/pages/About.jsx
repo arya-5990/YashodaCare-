@@ -21,7 +21,8 @@ export default function About() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-bokeh-teal opacity-20 rounded-full blur-3xl -translate-y-10 translate-x-10"></div>
             
             <p className="text-body-lg text-surface-tint leading-loose mb-10 relative z-10 text-lg md:text-xl font-medium">
-              India doesn’t suffer from a shortage of experts; it suffers from a shortage of access. Rural reach, affordability, fragmented workflow, and time constraints are the real problems. <strong className="text-primary font-bold">Doctor Desk</strong> is my vision to bridge this gap—connecting users with verified professionals and scheduling tools on one trusted platform, at a cost every Indian can afford.
+              During my clinical journey, I saw a common reality across India: people often ignore dental health due to lack of awareness and the fear of high treatment costs, seeking help only when the condition becomes severe. That gap moved me to start <strong className="text-primary font-bold">Smile Sathi</strong> from zero, without external backing, driven purely by purpose and determination.
+              Working at the grassroots level—listening to patients, understanding their struggles, and learning from their stories—I set out to build a platform that makes dental care affordable, preventive, and accessible. Smile Sathi is not just a dental plan; it is a movement to ensure every individual treats oral health as an essential part of overall well-being, not a luxury. My vision is simple: empower people to care for their smiles without fear, hesitation, or financial burden.
             </p>
             
             <div className="relative z-10 pt-8 border-t border-surface-container flex flex-col sm:flex-row items-start sm:items-center gap-6 mt-8">
@@ -32,7 +33,7 @@ export default function About() {
               </div>
               <div>
                 <h3 className="text-title-lg text-primary font-black text-2xl md:text-3xl">Dr. Ankit Chourasiya</h3>
-                <p className="text-label-md font-bold text-tertiary tracking-widest uppercase mt-2">Founder and CEO, DoctorDesk</p>
+                <p className="text-label-md font-bold text-tertiary tracking-widest uppercase mt-2">Chief Dentist | Founder & CEO – Smile Sathi, Indore</p>
               </div>
             </div>
           </div>

@@ -22,16 +22,15 @@ const razorpay = new Razorpay({
 // --------------------------------------------
 
 // ---------- CASHFREE CONFIGURATION ----------
-// For now we use your TEST keys directly so you
-// can deploy without extra config. When you move
-// to production, switch to environment variables.
+// Production keys configured directly in functions.
+// For better security, consider moving these to Firebase environment variables in the future.
 
-const CASHFREE_APP_ID = "TEST11037912ca2f79f9e9289597351221973011";
-const CASHFREE_SECRET_KEY = "cfsk_ma_test_df9ef8b28cf9c2757632020df3f7d705_bbad4d14";
+const CASHFREE_APP_ID = "124822350bc0969073fc7e0363c3228421";
+const CASHFREE_SECRET_KEY = "cfsk_ma_prod_fe66b5dfad0c6588807dfc0a44610cc1_33cb972d";
 
 // Optional overrides via environment variables
 const CASHFREE_WEBHOOK_SECRET = process.env.CASHFREE_WEBHOOK_SECRET || "";
-const CASHFREE_ENV = process.env.CASHFREE_ENV || "sandbox";
+const CASHFREE_ENV = process.env.CASHFREE_ENV || "production";
 
 const CASHFREE_API_VERSION = "2022-09-01";
 const CASHFREE_BASE_URL =
@@ -202,9 +201,9 @@ exports.createCashfreeOrder = functions.https.onRequest(async (req, res) => {
 				order_meta: {
 					// User is redirected here after payment completion
 					return_url:
-						"https://www.smilesathi.in/profile?cf_order_id={order_id}",
+						"https://www.smilesathi.in/profile",
 					// Cashfree will send server-to-server notification to this URL
-					notify_url: `https://us-central1-${process.env.GCLOUD_PROJECT}.cloudfunctions.net/cashfreeWebhook`,
+					notify_url: `https://us-central1-ydcplans.cloudfunctions.net/cashfreeWebhook`,
 				},
 				notes: {
 					planId,
@@ -365,15 +364,18 @@ exports.cashfreeWebhook = functions.https.onRequest(async (req, res) => {
 				console.warn("CASHFREE_WEBHOOK_SECRET not configured – skipping signature verification");
 			}
 
-			const event = req.body?.event;
+			const event = req.body?.event || req.body?.type || "";
 			const order = req.body?.data?.order || {};
 			const payment = req.body?.data?.payment || {};
 
-			const orderId = order.order_id;
-			const orderStatus = (order.order_status || "").toUpperCase();
-			const paymentId = payment.payment_id;
+			const orderId = order.order_id || req.body?.orderId;
+			const orderStatus = (order.order_status || payment.payment_status || "").toUpperCase();
+			const paymentId = payment.payment_id || payment.cf_payment_id || req.body?.referenceId;
+
+			console.log(`Cashfree Webhook received for Order: ${orderId}, Status: ${orderStatus}, Event: ${event}`);
 
 			if (!orderId) {
+				console.error("Missing order_id in Cashfree webhook body", req.body);
 				res.status(400).send("Missing order_id");
 				return;
 			}
@@ -382,7 +384,8 @@ exports.cashfreeWebhook = functions.https.onRequest(async (req, res) => {
 				orderStatus === "PAID" ||
 				orderStatus === "SUCCESS" ||
 				orderStatus === "COMPLETED" ||
-				event === "payment.captured";
+				event === "payment.captured" ||
+				event === "PAYMENT_SUCCESS_WEBHOOK";
 
 			const txnRef = admin.firestore().collection("transactions").doc(orderId);
 			const txnSnap = await txnRef.get();

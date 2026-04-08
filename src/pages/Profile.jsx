@@ -302,51 +302,61 @@ export default function Profile() {
         }, []);
 
         if (allDocs.length > 0) {
-          const plansList = allDocs.map(d => {
-            const pData = d.data();
-            const planInfo = planDataMap[pData.planId] || planDataMap[String(pData.planId)] || {};
+          const plansList = allDocs
+            .filter(d => {
+              const pData = d.data();
+              return Boolean(planDataMap[pData.planId] || planDataMap[String(pData.planId)]);
+            })
+            .map(d => {
+              const pData = d.data();
+              const planInfo = planDataMap[pData.planId] || planDataMap[String(pData.planId)];
 
-            // Resolve title
-            const title = pData.planTitle || planInfo.title || planInfo.planTitle || 'Membership Plan';
-            // Resolve duration in days: plan doc → purchase doc → default 365 days
-            const durationDays = parseDurationDays(
-              planInfo.duration ?? planInfo.durationDays ?? planInfo.durationMonths
-              ?? pData.duration ?? pData.durationDays ?? pData.durationMonths
-            );
+              // Resolve title
+              const title = pData.planTitle || planInfo.title || planInfo.planTitle || 'Membership Plan';
+              // Resolve duration in days: plan doc → purchase doc → default 365 days
+              const durationDays = parseDurationDays(
+                planInfo.duration ?? planInfo.durationDays ?? planInfo.durationMonths
+                ?? pData.duration ?? pData.durationDays ?? pData.durationMonths
+              );
 
-            return {
-              id: pData.planId || 'UNKNOWN',
-              title,
-              description: planInfo.description || pData.description || '',
-              status: pData.status === 'SUCCESS' ? 'Active' : (pData.status || 'Active'),
-              purchasedOn: pData.createdAt?.toDate
-                ? pData.createdAt.toDate().toISOString()
-                : (pData.createdAt || new Date().toISOString()),
-              price: pData.amount || planInfo.discountedPrice || 999,
-              durationDays,
-              includes: planInfo.includes || planInfo.benefits || [],
-              note: planInfo.note || '',
-              planType: planInfo.planType || '',
-            };
-          });
+              return {
+                id: pData.planId || 'UNKNOWN',
+                title,
+                description: planInfo.description || pData.description || '',
+                status: pData.status === 'SUCCESS' ? 'Active' : (pData.status || 'Active'),
+                purchasedOn: pData.createdAt?.toDate
+                  ? pData.createdAt.toDate().toISOString()
+                  : (pData.createdAt || new Date().toISOString()),
+                price: pData.amount || planInfo.discountedPrice || 999,
+                durationDays,
+                includes: planInfo.includes || planInfo.benefits || [],
+                note: planInfo.note || '',
+                planType: planInfo.planType || '',
+              };
+            });
           setUserPlans(plansList);
 
         } else if (userSnap.exists() && userSnap.data().plan_id) {
           const data = userSnap.data();
-          const planInfo = planDataMap[data.plan_id] || {};
-          const durationDays = parseDurationDays(planInfo.duration ?? planInfo.durationDays ?? planInfo.durationMonths);
-          setUserPlans([{
-            id: data.plan_id,
-            title: data.plan_title || planInfo.title || 'Membership Plan',
-            description: planInfo.description || '',
-            status: 'Active',
-            purchasedOn: data.plan_purchased_at || data.createdAt || new Date().toISOString(),
-            price: data.plan_price || planInfo.discountedPrice || 999,
-            durationDays,
-            includes: planInfo.includes || [],
-            note: planInfo.note || '',
-            planType: planInfo.planType || '',
-          }]);
+          const planInfo = planDataMap[data.plan_id] || planDataMap[String(data.plan_id)];
+          
+          if (planInfo) {
+            const durationDays = parseDurationDays(planInfo.duration ?? planInfo.durationDays ?? planInfo.durationMonths);
+            setUserPlans([{
+              id: data.plan_id,
+              title: data.plan_title || planInfo.title || 'Membership Plan',
+              description: planInfo.description || '',
+              status: 'Active',
+              purchasedOn: data.plan_purchased_at || data.createdAt || new Date().toISOString(),
+              price: data.plan_price || planInfo.discountedPrice || 999,
+              durationDays,
+              includes: planInfo.includes || [],
+              note: planInfo.note || '',
+              planType: planInfo.planType || '',
+            }]);
+          } else {
+             setUserPlans([]);
+          }
         } else {
           setUserPlans([]);
         }

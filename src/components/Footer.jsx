@@ -3,7 +3,7 @@ import { Mail, Phone, MapPin, Stethoscope } from 'lucide-react';
 
 const Instagram = ({ size = 24, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
   </svg>
 );
 
@@ -29,7 +29,7 @@ export default function Footer() {
 
       <div className="relative max-w-7xl mx-auto px-5 md:px-8 z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 md:gap-12 mb-20">
-          
+
           <div className="lg:col-span-2 space-y-8">
             <Link to="/" className="flex items-center gap-2 group">
               <span className="text-3xl font-black tracking-tighter text-white">
@@ -42,7 +42,7 @@ export default function Footer() {
             <p className="text-label-md text-primary-fixed-dim max-w-xs leading-relaxed mt-4">
               Premium clinical-grade dental care accessible and simple.
             </p>
-            
+
             <div className="flex gap-4">
               <a href="https://www.instagram.com/smilesathiofficial_/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-primary-fixed-dim/30 flex items-center justify-center text-primary-fixed-dim hover:text-white transition-all hover:border-[--color-brand-blue]">
                 <Instagram size={18} />
@@ -105,20 +105,20 @@ export default function Footer() {
             </div>
           ))}
         </div>
-        
+
         <div className="border-t border-white/10 pt-8 mt-12 flex flex-col md:flex-row items-center justify-between">
           <p className="text-label-md text-primary-fixed-dim opacity-70">
             © {year} SmileSathi. All rights reserved.
           </p>
           <p className="text-label-md text-primary-fixed-dim opacity-70 mt-4 md:mt-0 flex items-center flex-wrap gap-1.5 justify-center md:justify-end">
             Made with <span className="text-[--color-accent-joy] animate-pulse">❤</span> by
-            <a 
-              href="https://www.linkedin.com/in/arya-sharma-1963b030a" 
-              target="_blank" 
+            <a
+              href="https://www.antilabs.in"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-white hover:text-[--color-brand-blue] transition-colors font-semibold ml-0.5"
             >
-              Arya Sharma
+              AntiLabs
             </a>
           </p>
         </div>

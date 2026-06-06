@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { collection, doc, setDoc, query, where, getDocs, runTransaction } from 'firebase/firestore';
-import { db } from '../firebase';
 import { Loader2, Eye, EyeOff, KeyRound, Mail, ArrowLeft, CheckCircle2, ShieldAlert } from 'lucide-react';
-import bcrypt from 'bcryptjs';
 import { useAuth } from '../context/AuthContext';
 
-const BASE_URL = 'https://us-central1-ydcplans.cloudfunctions.net';
+const BASE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
 
 // ─── Forgot Password Modal ────────────────────────────────────────────────────
 // step: 'phone' → 'otp' → 'reset' → 'done'
@@ -35,9 +32,12 @@ function ForgotPasswordModal({ onClose }) {
     if (!phone.trim()) return setError('Please enter your phone number.');
     setLoading(true); setError('');
     try {
-      const res = await fetch(`${BASE_URL}/sendForgotPasswordOTP`, {
+      const res = await fetch(`${BASE_URL}/auth-reset-otp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
         body: JSON.stringify({ phone: phone.trim() }),
       });
       const data = await res.json();
@@ -84,9 +84,12 @@ function ForgotPasswordModal({ onClose }) {
     if (newPassword.length < 6) return setError('Minimum 6 character password required.');
     setLoading(true); setError('');
     try {
-      const res = await fetch(`${BASE_URL}/resetPasswordWithOTP`, {
+      const res = await fetch(`${BASE_URL}/auth-reset-confirm`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
         body: JSON.stringify({ userId, otp: otp.join(''), newPassword }),
       });
       const data = await res.json();
@@ -349,12 +352,17 @@ export default function Auth() {
     try {
       if (isLogin) {
         if (!form.phone || !form.password) throw new Error('Please fill all fields');
-        const q = query(collection(db, 'users'), where('phone', '==', form.phone));
-        const snap = await getDocs(q);
-        if (snap.empty) throw new Error('Invalid phone number or password.');
-        const userData = snap.docs[0].data();
-        if (!bcrypt.compareSync(form.password, userData.password)) throw new Error('Invalid phone number or password.');
-        await loginUser({ user_id: userData.user_id, name: userData.name, phone: userData.phone });
+        const res = await fetch(`${BASE_URL}/auth-login`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({ phone: form.phone, password: form.password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Invalid phone number or password.');
+        await loginUser({ accessToken: data.accessToken, refreshToken: data.refreshToken, user: data.user });
         navigate('/plans');
       } else {
         if (!form.name || !form.phone || !form.email || !form.password || !form.address || !form.pincode)
@@ -362,28 +370,25 @@ export default function Auth() {
         if (form.password !== form.confirmPassword) throw new Error('Passwords do not match');
         if (form.password.length < 6) throw new Error('Minimum 6 digit password required');
 
-        const usersRef = collection(db, 'users');
-        const dupCheck = await getDocs(query(usersRef, where('phone', '==', form.phone)));
-        if (!dupCheck.empty) throw new Error('An account with this phone number already exists.');
-
-        const salt = bcrypt.genSaltSync(10);
-        const hashedPassword = bcrypt.hashSync(form.password, salt);
-
-        const counterRef = doc(db, '_metadata', 'userIdCounter');
-        let newUserId;
-        await runTransaction(db, async (transaction) => {
-          const counterDoc = await transaction.get(counterRef);
-          if (!counterDoc.exists()) { transaction.set(counterRef, { currentId: 1000 }); newUserId = 1000; }
-          else { newUserId = counterDoc.data().currentId + 1; transaction.update(counterRef, { currentId: newUserId }); }
+        const res = await fetch(`${BASE_URL}/auth-register`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            name: form.name,
+            phone: form.phone,
+            email: form.email,
+            password: form.password,
+            address: form.address,
+            pincode: form.pincode,
+            referral: form.referral || '',
+          }),
         });
-
-        await setDoc(doc(usersRef, newUserId.toString()), {
-          user_id: newUserId, name: form.name, phone: form.phone, email: form.email,
-          address: form.address, pincode: form.pincode, password: hashedPassword,
-          referral: form.referral || '', createdAt: new Date().toISOString()
-        });
-
-        await loginUser({ user_id: newUserId, name: form.name, phone: form.phone });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Registration failed.');
+        await loginUser({ accessToken: data.accessToken, refreshToken: data.refreshToken, user: data.user });
         navigate('/plans');
       }
     } catch (err) {

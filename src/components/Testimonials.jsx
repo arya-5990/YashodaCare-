@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Quote, Star, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 
 const DEFAULT_REVIEWS = [
   {
@@ -33,12 +32,19 @@ export default function Testimonials() {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const q = query(collection(db, 'testimonials'), orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          const fetchedData = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
+        const { data: dbTestimonials, error } = await supabase
+          .from('testimonials')
+          .select('*')
+          .order('createdAt', { ascending: false });
+
+        if (dbTestimonials && !error && dbTestimonials.length > 0) {
+          const fetchedData = dbTestimonials.map(t => ({
+            id: t.id,
+            name: t.name,
+            rating: t.rating,
+            review: t.review,
+            planType: t.planType,
+            createdAt: t.createdAt,
           }));
           setTestimonials(fetchedData);
         } else {

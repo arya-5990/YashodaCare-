@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 import { Loader2, ShoppingBag, Star, Tag, ExternalLink, Package, Sparkles } from 'lucide-react';
 
 // ─── Coming Soon Fallback ─────────────────────────────────────────────────────
@@ -132,10 +131,27 @@ export default function Products() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const snap = await getDocs(collection(db, 'products'));
-        if (!snap.empty) {
-          const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          // Sort: pinned first, then by order field, then newest first
+        const { data: dbProducts, error } = await supabase
+          .from('products')
+          .select('*');
+
+        if (dbProducts && !error && dbProducts.length > 0) {
+          const data = dbProducts.map(p => ({
+            id: p.id,
+            name: p.name,
+            description: p.description,
+            imageUrl: p.imageUrl,
+            price: p.price ? Number(p.price) : null,
+            originalPrice: p.originalPrice ? Number(p.originalPrice) : null,
+            category: p.category,
+            link: p.link,
+            isNew: p.isNew,
+            isBestseller: p.isBestseller,
+            discount: p.discount,
+            isPinned: p.isPinned,
+            order: p.order,
+          }));
+          // Sort: pinned first, then by order field
           data.sort((a, b) => {
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;

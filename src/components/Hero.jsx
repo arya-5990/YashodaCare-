@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import { ShieldCheck, Sparkles } from 'lucide-react';
 import heroImg from '../assets/hero_image.png';
 import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 
 // Fallback defaults
 const DEFAULTS = {
@@ -19,10 +18,13 @@ export default function Hero() {
   useEffect(() => {
     const fetchHeroText = async () => {
       try {
-        const snapshot = await getDocs(collection(db, 'siteTexts'));
-        if (!snapshot.empty) {
-          // Take the first document
-          const data = snapshot.docs[0].data();
+        const { data: dbSiteTexts, error } = await supabase
+          .from('site_texts')
+          .select('*')
+          .limit(1);
+
+        if (dbSiteTexts && !error && dbSiteTexts.length > 0) {
+          const data = dbSiteTexts[0];
           setHeroData({
             section: data.section || DEFAULTS.section,
             label:   data.label   || DEFAULTS.label,

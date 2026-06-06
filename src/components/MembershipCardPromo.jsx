@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 
 const FALLBACK_CONTENT = {
   promoTitle: 'Get your own Premium Member Card',
@@ -21,17 +20,20 @@ export default function MembershipCardPromo() {
   useEffect(() => {
     const fetchCardDetails = async () => {
       try {
-        const ref = doc(db, 'cardDetails', 'main');
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          const data = snap.data();
+        const { data: dbCardDetails, error } = await supabase
+          .from('card_details')
+          .select('*')
+          .eq('id', 'main')
+          .single();
+
+        if (dbCardDetails && !error) {
           setContent({
-            promoTitle: data.promoTitle || FALLBACK_CONTENT.promoTitle,
-            promoDescription: data.promoDescription || FALLBACK_CONTENT.promoDescription,
-            line1: data.line1 || FALLBACK_CONTENT.line1,
-            line2: data.line2 || FALLBACK_CONTENT.line2,
-            line3: data.line3 || FALLBACK_CONTENT.line3,
-            promoImage: data.promoImage || FALLBACK_CONTENT.promoImage,
+            promoTitle: dbCardDetails.promoTitle || FALLBACK_CONTENT.promoTitle,
+            promoDescription: dbCardDetails.promoDescription || FALLBACK_CONTENT.promoDescription,
+            line1: dbCardDetails.line1 || FALLBACK_CONTENT.line1,
+            line2: dbCardDetails.line2 || FALLBACK_CONTENT.line2,
+            line3: dbCardDetails.line3 || FALLBACK_CONTENT.line3,
+            promoImage: dbCardDetails.promoImage || FALLBACK_CONTENT.promoImage,
           });
         }
       } catch (err) {

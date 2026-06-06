@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
-import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import {
   Loader2, LogOut, Check, Edit2, UserCircle, Star, Sparkles,
@@ -274,81 +273,109 @@ export default function Profile() {
     const fetchData = async () => {
       if (!user?.user_id) return;
       try {
-        const userRef = doc(db, 'users', user.user_id.toString());
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-          setForm({ name: data.name || '', phone: data.phone || '', email: data.email || '', address: data.address || '' });
+        // Fetch user administrative details
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.user_id.toString())
+          .single();
+
+        if (userData && !userError) {
+          setForm({
+            name: userData.name || '',
+            phone: userData.phone || '',
+            email: userData.email || '',
+            address: userData.address || '',
+          });
         }
 
         // Fetch plans collection → full plan data map by planId
-        const plansSnap = await getDocs(collection(db, 'plans'));
-        const planDataMap = {};
-        plansSnap.forEach(planDoc => {
-          planDataMap[planDoc.id] = { id: planDoc.id, ...planDoc.data() };
-        });
+        const { data: plansData, error: plansError } = await supabase
+          .from('plans')
+          .select('*');
 
-        // Fetch purchases
-        const purchasesRef = collection(db, 'purchases');
-        const queries = [getDocs(query(purchasesRef, where('userId', '==', user.user_id.toString())))];
-        if (!isNaN(Number(user.user_id))) {
-          queries.push(getDocs(query(purchasesRef, where('userId', '==', Number(user.user_id)))));
+        const planDataMap = {};
+        if (plansData && !plansError) {
+          plansData.forEach(p => {
+            planDataMap[p.id] = {
+              id: p.id,
+              title: p.title,
+              description: p.description,
+              discountedPrice: p.discountedPrice,
+              actualPrice: p.actualPrice,
+              duration: p.duration,
+              note: p.note,
+              planType: p.planType,
+              isBestseller: p.isBestseller,
+              includes: p.includes || [],
+            };
+          });
         }
 
-        const snaps = await Promise.all(queries);
-        const allDocs = snaps.flatMap(s => s.docs).reduce((acc, d) => {
-          if (!acc.find(x => x.id === d.id)) acc.push(d);
-          return acc;
-        }, []);
+        // Fetch purchases (userId as string or integer checks)
+        const { data: purchasesData, error: purchasesError } = await supabase
+          .from('purchases')
+          .select('*')
+          .eq('userId', user.user_id.toString());
 
-        if (allDocs.length > 0) {
-          const plansList = allDocs
-            .filter(d => {
-              const pData = d.data();
+        let allPurchases = purchasesData || [];
+        if (!purchasesError && !isNaN(Number(user.user_id))) {
+          const { data: numericPurchases } = await supabase
+            .from('purchases')
+            .select('*')
+            .eq('userId', Number(user.user_id));
+          if (numericPurchases) {
+            numericPurchases.forEach(p => {
+              if (!allPurchases.find(x => x.id === p.id)) {
+                allPurchases.push(p);
+              }
+            });
+          }
+        }
+
+        if (allPurchases.length > 0) {
+          const plansList = allPurchases
+            .filter(pData => {
               return Boolean(planDataMap[pData.planId] || planDataMap[String(pData.planId)]);
             })
-            .map(d => {
-              const pData = d.data();
+            .map(pData => {
               const planInfo = planDataMap[pData.planId] || planDataMap[String(pData.planId)];
 
               // Resolve title
-              const title = pData.planTitle || planInfo.title || planInfo.planTitle || 'Membership Plan';
-              // Resolve duration in days: plan doc → purchase doc → default 365 days
+              const title = pData.planTitle || planInfo.title || 'Membership Plan';
+              // Resolve duration
               const durationDays = parseDurationDays(
-                planInfo.duration ?? planInfo.durationDays ?? planInfo.durationMonths
-                ?? pData.duration ?? pData.durationDays ?? pData.durationMonths
+                planInfo.duration ?? pData.duration ?? 365
               );
 
               return {
                 id: pData.planId || 'UNKNOWN',
                 title,
-                description: planInfo.description || pData.description || '',
+                description: planInfo.description || '',
                 status: pData.status === 'SUCCESS' ? 'Active' : (pData.status || 'Active'),
-                purchasedOn: pData.createdAt?.toDate
-                  ? pData.createdAt.toDate().toISOString()
-                  : (pData.createdAt || new Date().toISOString()),
+                purchasedOn: pData.createdAt || new Date().toISOString(),
                 price: pData.amount || planInfo.discountedPrice || 999,
                 durationDays,
-                includes: planInfo.includes || planInfo.benefits || [],
+                includes: planInfo.includes || [],
                 note: planInfo.note || '',
                 planType: planInfo.planType || '',
               };
             });
           setUserPlans(plansList);
 
-        } else if (userSnap.exists() && userSnap.data().plan_id) {
-          const data = userSnap.data();
-          const planInfo = planDataMap[data.plan_id] || planDataMap[String(data.plan_id)];
+        } else if (userData && (userData.planId || userData.plan_id)) {
+          const activePlanId = userData.planId || userData.plan_id;
+          const planInfo = planDataMap[activePlanId] || planDataMap[String(activePlanId)];
           
           if (planInfo) {
-            const durationDays = parseDurationDays(planInfo.duration ?? planInfo.durationDays ?? planInfo.durationMonths);
+            const durationDays = parseDurationDays(planInfo.duration);
             setUserPlans([{
-              id: data.plan_id,
-              title: data.plan_title || planInfo.title || 'Membership Plan',
+              id: activePlanId,
+              title: userData.planTitle || userData.plan_title || planInfo.title || 'Membership Plan',
               description: planInfo.description || '',
               status: 'Active',
-              purchasedOn: data.plan_purchased_at || data.createdAt || new Date().toISOString(),
-              price: data.plan_price || planInfo.discountedPrice || 999,
+              purchasedOn: userData.planPurchasedAt || userData.plan_purchased_at || userData.createdAt || new Date().toISOString(),
+              price: planInfo.discountedPrice || 999,
               durationDays,
               includes: planInfo.includes || [],
               note: planInfo.note || '',
@@ -383,11 +410,20 @@ export default function Profile() {
     try {
       if (!form.name || !form.phone || !form.email || !form.address)
         throw new Error('Verification requires all fields.');
-      const userRef = doc(db, 'users', user.user_id.toString());
-      await updateDoc(userRef, { name: form.name, phone: form.phone, email: form.email, address: form.address, updatedAt: new Date().toISOString() });
+      
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          name: form.name,
+          phone: form.phone,
+          email: form.email,
+          address: form.address,
+        })
+        .eq('id', user.user_id.toString());
+
+      if (updateError) throw updateError;
+      
       setUser(prev => ({ ...prev, name: form.name, phone: form.phone }));
-      const stored = localStorage.getItem('auth_token');
-      if (stored) localStorage.setItem('auth_token', JSON.stringify({ ...JSON.parse(stored), name: form.name, phone: form.phone }));
       setSuccess('Clinical records updated successfully.');
       setIsEditing(false);
     } catch (err) {

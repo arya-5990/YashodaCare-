@@ -3,8 +3,7 @@ import { useRef, useState, useEffect } from 'react';
 import { User, Heart, Sparkles, Activity, ShieldPlus, BadgeCheck, Stethoscope, ChevronLeft, ChevronRight, Award, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 
 const FALLBACK_DOCTORS = [
   {
@@ -59,22 +58,20 @@ export default function DoctorsSection() {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const docRef = doc(db, "assets", "doctor");
-        const docSnap = await getDoc(docRef);
+        const { data: dbDoctors, error } = await supabase
+          .from('doctors')
+          .select('*');
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.doctors && Array.isArray(data.doctors)) {
-            // Map the firestore structure to our UI structure
-            const mappedDoctors = data.doctors.map(d => ({
-              role: d.name, // Doctor's name as primary title
-              specialty: d.speciality, // Role/specialty as sub-label
-              img: d.image,
-              isMedalist: d.IsGoldMedalist,
-              description: d.description || "Advanced certification in specialized clinical protocols."
-            }));
-            setDoctors(mappedDoctors);
-          }
+        if (dbDoctors && !error && dbDoctors.length > 0) {
+          // Map the postgres structure to our UI structure
+          const mappedDoctors = dbDoctors.map(d => ({
+            role: d.name, // Doctor's name as primary title
+            specialty: d.speciality, // Role/specialty as sub-label
+            img: d.image,
+            isMedalist: d.IsGoldMedalist,
+            description: d.description || "Advanced certification in specialized clinical protocols."
+          }));
+          setDoctors(mappedDoctors);
         }
       } catch (error) {
         console.error("Error fetching doctors:", error);

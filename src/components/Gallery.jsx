@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 
 const FALLBACK_IMAGES = [
   "https://quintessencedental.com/wp-content/uploads/2025/07/Dental-Clinic-Interior-Design-jpg.webp",
@@ -18,14 +17,12 @@ export default function Gallery() {
   useEffect(() => {
     const fetchClinicImages = async () => {
       try {
-        const docRef = doc(db, "assets", "clinic");
-        const docSnap = await getDoc(docRef);
+        const { data: dbImages, error } = await supabase
+          .from('clinic_images')
+          .select('imageUrl');
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.images && Array.isArray(data.images)) {
-            setImages(data.images);
-          }
+        if (dbImages && !error && dbImages.length > 0) {
+          setImages(dbImages.map(img => img.imageUrl));
         }
       } catch (error) {
         console.error("Error fetching clinic images:", error);

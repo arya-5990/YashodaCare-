@@ -2,9 +2,8 @@ import { motion } from 'framer-motion';
 import { Check, Sparkles, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { collection, getDocs } from 'firebase/firestore';
+import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
-import { db } from '../firebase';
 
 export default function PlanSection() {
   const { user } = useAuth();
@@ -42,9 +41,13 @@ export default function PlanSection() {
 
     try {
       // 1. Create Cashfree order on backend
-      const orderRes = await fetch('https://us-central1-ydcplans.cloudfunctions.net/createCashfreeOrder', {
+      const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+      const orderRes = await fetch(`${FUNCTIONS_URL}/payment-create-order`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
         body: JSON.stringify({ userId: user.user_id, planId: plan.id }),
       });
 
@@ -72,10 +75,24 @@ export default function PlanSection() {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'plans'));
-        if (!querySnapshot.empty) {
-          const plansData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          console.log('Plans from Firestore:', plansData.map(p => ({ title: p.title, isBestseller: p.isBestseller })));
+        const { data: dbPlans, error } = await supabase
+          .from('plans')
+          .select('*');
+
+        if (dbPlans && !error && dbPlans.length > 0) {
+          const plansData = dbPlans.map(p => ({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            discountedPrice: Number(p.discountedPrice),
+            actualPrice: p.actualPrice ? Number(p.actualPrice) : null,
+            isPopular: p.isPopular,
+            isBestseller: p.isBestseller,
+            includes: p.includes || [],
+            note: p.note,
+            planType: p.planType,
+          }));
+          console.log('Plans from Postgres:', plansData.map(p => ({ title: p.title, isBestseller: p.isBestseller })));
           // Sort: bestseller in the middle, rest sorted by price
           const bestsellers = plansData.filter(p => p.isBestseller === true);
           const others = plansData.filter(p => p.isBestseller !== true).sort((a, b) => (a.discountedPrice || 0) - (b.discountedPrice || 0));

@@ -37,18 +37,22 @@ serve(async (req) => {
     // Verify webhook signature if secret is configured
     if (CASHFREE_WEBHOOK_SECRET) {
       const signature = req.headers.get("x-webhook-signature");
+      const timestamp = req.headers.get("x-webhook-timestamp") || "";
       if (!signature) {
         console.error("Missing x-webhook-signature header");
         return new Response("Missing signature", { status: 400 });
       }
 
+      const signedPayload = timestamp + rawBody;
       const expected = crypto
         .createHmac("sha256", CASHFREE_WEBHOOK_SECRET)
-        .update(rawBody)
+        .update(signedPayload)
         .digest("base64");
 
       if (expected !== signature) {
         console.error("Invalid Cashfree webhook signature");
+        console.error("Expected signature:", expected);
+        console.error("Received signature:", signature);
         return new Response("Invalid signature", { status: 400 });
       }
     } else {
@@ -101,8 +105,6 @@ serve(async (req) => {
       .from("transactions")
       .update({
         status: newStatus,
-        paymentId: paymentId || transaction.paymentId || null,
-        paidAt: isSuccess ? new Date().toISOString() : null,
       })
       .eq("id", orderId);
 

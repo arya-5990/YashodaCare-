@@ -26,12 +26,14 @@ function parseDurationDays(durationValue) {
   if (raw.includes('month')) return Math.round(num * 30);
   if (raw.includes('day'))   return Math.round(num);
 
-  // Bare number: >=60 = days (e.g. 365), <60 = months (e.g. 12)
-  return num >= 60 ? Math.round(num) : Math.round(num * 30);
+  // In Supabase, the duration column is an integer storing the count of days.
+  // We treat all bare numbers as days directly.
+  return Math.round(num);
 }
 
 // Human-readable duration label for display
 function formatDurationLabel(days) {
+  if (days === 1) return '1 day';
   if (days % 365 === 0) return `${days / 365} year${days / 365 !== 1 ? 's' : ''}`;
   if (days % 30 === 0)  return `${days / 30} month${days / 30 !== 1 ? 's' : ''}`;
   return `${days} days`;
